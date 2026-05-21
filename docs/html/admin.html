@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Giải Thích Chi Tiết - Module Admin (src/admin)</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #21262d;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --text-muted: #8b949e;
+      --heading: #f0f6fc;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --yellow: #d29922;
+      --red: #f85149;
+      --code-bg: #161b22;
+      --inline-code-bg: #1f2428;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 15px;
+      line-height: 1.75;
+    }
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 32px 80px;
+    }
+
+    /* Headings */
+    h1,h2,h3,h4,h5,h6 { color: var(--heading); font-weight: 600; line-height: 1.25; margin: 2em 0 0.6em; }
+    h1 { font-size: 2em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; margin-top: 0; }
+    h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
+    h3 { font-size: 1.25em; }
+    h4 { font-size: 1.05em; }
+
+    /* Paragraphs & inline */
+    p { margin: 0.75em 0; }
+    strong { color: var(--heading); font-weight: 600; }
+    em { font-style: italic; }
+    del { color: var(--text-muted); text-decoration: line-through; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Code */
+    code {
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+      font-size: 0.875em;
+      background: var(--inline-code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.15em 0.4em;
+      color: #e6edf3;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 1.25em 0;
+      position: relative;
+    }
+    pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.875em;
+      line-height: 1.6;
+      color: #e6edf3;
+    }
+    /* Language badge */
+    pre[data-lang]::before {
+      content: attr(data-lang);
+      position: absolute;
+      top: 8px; right: 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Syntax highlight — basic token colors */
+    .kw  { color: #ff7b72; }   /* keywords */
+    .fn  { color: #d2a8ff; }   /* functions */
+    .str { color: #a5d6ff; }   /* strings */
+    .typ { color: #79c0ff; }   /* types */
+    .cmt { color: #8b949e; font-style: italic; } /* comments */
+    .num { color: #79c0ff; }   /* numbers */
+    .dec { color: #ffa657; }   /* decorators */
+
+    /* Lists */
+    ul, ol { padding-left: 2em; margin: 0.75em 0; }
+    li { margin: 0.3em 0; }
+    li > ul, li > ol { margin: 0.25em 0; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; margin: 1.25em 0; font-size: 14px; }
+    thead { background: var(--surface2); }
+    th { color: var(--heading); font-weight: 600; text-align: left; padding: 10px 14px; border: 1px solid var(--border); }
+    td { padding: 8px 14px; border: 1px solid var(--border); }
+    tr:hover { background: var(--surface); }
+
+    /* Blockquote */
+    blockquote {
+      margin: 1em 0;
+      padding: 12px 20px;
+      border-left: 4px solid var(--accent);
+      background: var(--surface);
+      border-radius: 0 6px 6px 0;
+      color: var(--text-muted);
+    }
+    blockquote p { margin: 0; }
+
+    /* Horizontal rule */
+    hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+
+    /* Callout badges (for custom labels like NOTE / WARNING / TIP) */
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      margin-right: 6px;
+    }
+    .badge-note    { background: #1f3a5f; color: var(--accent); }
+    .badge-warn    { background: #3a2e0a; color: var(--yellow); }
+    .badge-danger  { background: #3a0f0f; color: var(--red); }
+    .badge-ok      { background: #0f2f1a; color: var(--green); }
+
+    /* Section divider label (for ## headings inside code docs) */
+    .section-tag {
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: -1em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Giải Thích Chi Tiết - Module Admin (<code>src/admin</code>)</h1>
+
+    <p><code>src/admin</code> là khu vực chứa các API chỉ dành cho quản trị viên. Module này không phục vụ khách hàng thông thường, mà tập trung vào các thao tác vận hành hệ thống như quản lý danh mục, quản lý sản phẩm và theo dõi đơn hàng.</p>
+
+    <h2>1. <code>admin.module.ts</code> - Điểm ghép module</h2>
+
+<pre data-lang="typescript"><code>
+<span class="dec">@Module</span>({
+  imports: [<span class="typ">AuthModule</span>],
+  controllers: [<span class="typ">AdminController</span>],
+  providers: [<span class="typ">AdminService</span>, <span class="typ">RolesGuard</span>],
+})
+<span class="kw">export class</span> <span class="typ">AdminModule</span> {}
+</code></pre>
+
+    <p>File này khai báo 3 ý chính:</p>
+
+    <ul>
+      <li><code>imports: [AuthModule]</code>: tái sử dụng phần xác thực đã có sẵn từ module <code>auth</code>.</li>
+      <li><code>controllers: [AdminController]</code>: mọi request <code>/admin/...</code> sẽ đi vào controller này.</li>
+      <li><code>providers: [AdminService, RolesGuard]</code>: đăng ký service xử lý nghiệp vụ và guard kiểm tra phân quyền.</li>
+    </ul>
+
+    <h2>2. <code>admin.controller.ts</code> - Cửa vào của Admin API</h2>
+
+<pre data-lang="typescript"><code>
+<span class="dec">@Controller</span>(<span class="str">'admin'</span>)
+<span class="dec">@UseGuards</span>(<span class="typ">AuthGuard</span>, <span class="typ">RolesGuard</span>)
+<span class="dec">@Roles</span>(<span class="typ">UserRole</span>.<span class="typ">ADMIN</span>)
+<span class="kw">export class</span> <span class="typ">AdminController</span> { ... }
+</code></pre>
+
+    <p>Đây là lớp đứng ở đầu luồng request:</p>
+
+    <ul>
+      <li><code>@Controller('admin')</code>: mọi route bên trong đều có tiền tố <code>/admin</code>.</li>
+      <li><code>@UseGuards(AuthGuard, RolesGuard)</code>: request phải vượt qua 2 lớp kiểm tra.</li>
+      <li><code>@Roles(UserRole.ADMIN)</code>: chỉ tài khoản có role <code>ADMIN</code> mới được phép dùng toàn bộ API trong controller này.</li>
+    </ul>
+
+    <p>Điều này có nghĩa là nếu user chưa đăng nhập thì bị chặn từ <code>AuthGuard</code>; nếu đã đăng nhập nhưng không phải admin thì <code>RolesGuard</code> sẽ trả về <code>403 Forbidden</code>.</p>
+
+    <h3>Các nhóm endpoint chính</h3>
+
+    <p>Controller hiện có 6 nhóm thao tác:</p>
+
+    <ol>
+      <li><code>POST /admin/categories</code>: tạo danh mục mới.</li>
+      <li><code>PATCH /admin/categories/:id</code>: cập nhật danh mục.</li>
+      <li><code>POST /admin/products</code>: tạo sản phẩm.</li>
+      <li><code>PATCH /admin/products/:id</code>: cập nhật sản phẩm.</li>
+      <li><code>DELETE /admin/products/:id</code>: xóa mềm sản phẩm.</li>
+      <li><code>GET /admin/orders</code> và <code>PATCH /admin/orders/:id/status</code>: xem danh sách đơn và đổi trạng thái đơn.</li>
+    </ol>
+
+    <p>Ví dụ route tạo sản phẩm:</p>
+
+<pre data-lang="typescript"><code>
+<span class="dec">@Post</span>(<span class="str">'products'</span>)
+<span class="kw">async</span> <span class="fn">createProduct</span>(
+  <span class="dec">@Req</span>() request: <span class="typ">Request</span> & { user: <span class="typ">JwtPayloadDto</span> },
+  <span class="dec">@Body</span>() dto: <span class="typ">CreateProductDto</span>,
+) {
+  <span class="kw">const</span> product = <span class="kw">await</span> <span class="kw">this</span>.adminService.<span class="fn">createProduct</span>(
+    request.user.userId,
+    dto,
+  );
+  <span class="kw">return</span> <span class="fn">success</span>(product);
+}
+</code></pre>
+
+    <p>Điểm đáng chú ý:</p>
+
+    <ul>
+      <li><code>request.user.userId</code> được lấy từ token đã được giải mã trước đó.</li>
+      <li><code>@Body() dto</code> buộc dữ liệu gửi lên phải đúng schema của DTO.</li>
+      <li>Kết quả luôn được bọc qua <code>success(...)</code> hoặc <code>paginated(...)</code> để response đồng nhất với phần còn lại của hệ thống.</li>
+    </ul>
+
+    <h2>3. <code>admin.service.ts</code> - Nơi xử lý nghiệp vụ thật</h2>
+
+<pre data-lang="typescript"><code>
+<span class="fn">constructor</span>(
+  <span class="kw">private readonly</span> prisma: <span class="typ">PrismaService</span>,
+  <span class="kw">private readonly</span> redisService: <span class="typ">RedisService</span>,
+) {}
+</code></pre>
+
+    <p><code>AdminService</code> nhận 2 phụ thuộc chính:</p>
+
+    <ul>
+      <li><code>PrismaService</code>: đọc/ghi dữ liệu vào database.</li>
+      <li><code>RedisService</code>: xóa cache khi dữ liệu sản phẩm hoặc danh mục thay đổi.</li>
+    </ul>
+
+    <p>Ngoài ra service còn dùng <code>Logger</code> để lưu lại dấu vết thao tác của admin, ví dụ admin nào vừa tạo sản phẩm hoặc vừa đổi trạng thái đơn hàng.</p>
+
+    <h3>3.1. Quản lý danh mục</h3>
+
+    <p>Khi tạo hoặc cập nhật danh mục, service luôn kiểm tra <code>slug</code> có bị trùng hay không bằng <code>ensureUniqueCategorySlug(...)</code>.</p>
+
+<pre data-lang="typescript"><code>
+<span class="kw">async</span> <span class="fn">createCategory</span>(adminUserId: <span class="typ">number</span>, dto: <span class="typ">CreateCategoryDto</span>) {
+  <span class="kw">await</span> <span class="kw">this</span>.<span class="fn">ensureUniqueCategorySlug</span>(dto.slug);
+
+  <span class="kw">const</span> category = <span class="kw">await</span> <span class="kw">this</span>.prisma.category.<span class="fn">create</span>({
+    data: dto,
+  });
+
+  <span class="kw">await</span> <span class="kw">this</span>.<span class="fn">invalidateCategoryCache</span>();
+  <span class="kw">this</span>.logger.<span class="fn">log</span>(<span class="str">`Admin ${adminUserId} created category ${category.id}`</span>);
+
+  <span class="kw">return</span> category;
+}
+</code></pre>
+
+    <p>Luồng xử lý ở đây là:</p>
+
+    <ol>
+      <li>Chặn trường hợp <code>slug</code> trùng.</li>
+      <li>Tạo dữ liệu trong bảng <code>category</code>.</li>
+      <li>Xóa cache danh mục để frontend không dùng dữ liệu cũ.</li>
+      <li>Ghi log thao tác của admin.</li>
+    </ol>
+
+    <h3>3.2. Quản lý sản phẩm</h3>
+
+    <p>Tạo sản phẩm có nhiều bước kiểm tra hơn:</p>
+
+<pre data-lang="typescript"><code>
+<span class="kw">async</span> <span class="fn">createProduct</span>(adminUserId: <span class="typ">number</span>, dto: <span class="typ">CreateProductDto</span>) {
+  <span class="kw">await</span> <span class="kw">this</span>.<span class="fn">ensureCategoryExists</span>(dto.categoryId);
+  <span class="kw">await</span> <span class="kw">this</span>.<span class="fn">ensureUniqueProductSlug</span>(dto.slug);
+
+  <span class="kw">const</span> product = <span class="kw">await</span> <span class="kw">this</span>.prisma.product.<span class="fn">create</span>({
+    data: {
+      name: dto.name,
+      slug: dto.slug,
+      description: dto.description,
+      price: <span class="kw">new</span> <span class="typ">Prisma</span>.<span class="typ">Decimal</span>(dto.price),
+      stock: dto.stock,
+      categoryId: dto.categoryId,
+      status: dto.status ?? <span class="typ">ProductStatus</span>.<span class="typ">ACTIVE</span>,
+      images: dto.images?.length
+        ? {
+            create: dto.images.<span class="fn">map</span>((image) => ({
+              url: image.url,
+              alt: image.alt,
+            })),
+          }
+        : <span class="kw">undefined</span>,
+    },
+    include: {
+      images: <span class="kw">true</span>,
+      category: <span class="kw">true</span>,
+    },
+  });
+
+  <span class="kw">await</span> <span class="kw">this</span>.<span class="fn">invalidateProductCache</span>(product.slug);
+  <span class="kw">return</span> product;
+}
+</code></pre>
+
+    <p>Những điểm quan trọng:</p>
+
+    <ul>
+      <li><code>ensureCategoryExists(dto.categoryId)</code>: không cho tạo sản phẩm nếu danh mục không tồn tại.</li>
+      <li><code>ensureUniqueProductSlug(dto.slug)</code>: tránh 2 sản phẩm dùng cùng một đường dẫn.</li>
+      <li><code>new Prisma.Decimal(dto.price)</code>: giá tiền được chuyển sang kiểu số thập phân chính xác để tránh lỗi làm tròn.</li>
+      <li><code>status ?? ProductStatus.ACTIVE</code>: nếu admin không gửi trạng thái, sản phẩm mặc định là <code>ACTIVE</code>.</li>
+      <li><code>images?.length ? { create: ... } : undefined</code>: chỉ tạo bản ghi ảnh khi thật sự có ảnh gửi lên.</li>
+    </ul>
+
+    <p>Khi cập nhật sản phẩm, service còn xử lý thêm 2 trường hợp:</p>
+
+    <ul>
+      <li>Nếu đổi <code>categoryId</code> thì kiểm tra danh mục mới có tồn tại không.</li>
+      <li>Nếu gửi <code>images</code>, toàn bộ ảnh cũ sẽ bị <code>deleteMany: {}</code> rồi tạo lại từ dữ liệu mới.</li>
+    </ul>
+
+    <p>Điều này đơn giản hóa logic đồng bộ ảnh, đổi lại là mỗi lần cập nhật ảnh sẽ thay toàn bộ danh sách thay vì sửa từng ảnh lẻ.</p>
+
+    <h3>3.3. Xóa mềm sản phẩm</h3>
+
+<pre data-lang="typescript"><code>
+<span class="kw">async</span> <span class="fn">softDeleteProduct</span>(adminUserId: <span class="typ">number</span>, id: <span class="typ">number</span>) {
+  <span class="kw">const</span> existing = <span class="kw">await</span> <span class="kw">this</span>.<span class="fn">ensureProductExists</span>(id);
+  <span class="kw">const</span> product = <span class="kw">await</span> <span class="kw">this</span>.prisma.product.<span class="fn">update</span>({
+    where: { id },
+    data: {
+      deletedAt: <span class="kw">new</span> <span class="typ">Date</span>(),
+    },
+  });
+
+  <span class="kw">await</span> <span class="kw">this</span>.<span class="fn">invalidateProductCache</span>(existing.slug, product.slug);
+  <span class="kw">return</span> product;
+}
+</code></pre>
+
+    <p>Đây không phải xóa cứng khỏi database. Thay vào đó, code gắn <code>deletedAt</code> bằng thời điểm hiện tại. Kiểu xóa này gọi là <strong>soft delete</strong>:</p>
+
+    <ul>
+      <li>dữ liệu vẫn còn để truy vết hoặc khôi phục;</li>
+      <li>tầng đọc dữ liệu có thể chủ động bỏ qua các sản phẩm đã bị xóa mềm.</li>
+    </ul>
+
+    <h3>3.4. Quản lý đơn hàng</h3>
+
+    <p>Admin có thể xem danh sách đơn hàng với phân trang và lọc theo trạng thái:</p>
+
+<pre data-lang="typescript"><code>
+<span class="kw">async</span> <span class="fn">findOrders</span>(query: <span class="typ">AdminOrderQueryDto</span>) {
+  <span class="kw">const</span> page = query.page ?? <span class="num">1</span>;
+  <span class="kw">const</span> limit = query.limit ?? <span class="num">10</span>;
+  <span class="kw">const</span> skip = (page - <span class="num">1</span>) * limit;
+  <span class="kw">const</span> where: <span class="typ">Prisma</span>.<span class="typ">OrderWhereInput</span> = {
+    ...(query.status ? { status: query.status } : {}),
+  };
+
+  <span class="kw">const</span> [orders, total] = <span class="kw">await</span> <span class="typ">Promise</span>.<span class="fn">all</span>([
+    <span class="kw">this</span>.prisma.order.<span class="fn">findMany</span>({ ... }),
+    <span class="kw">this</span>.prisma.order.<span class="fn">count</span>({ where }),
+  ]);
+
+  <span class="kw">return</span> {
+    data: orders.<span class="fn">map</span>((order) => <span class="kw">new</span> <span class="typ">AdminOrderResponseDto</span>(order)),
+    total,
+    page,
+    limit,
+  };
+}
+</code></pre>
+
+    <p>Ở đây có vài kỹ thuật đáng chú ý:</p>
+
+    <ul>
+      <li><code>page</code>, <code>limit</code>, <code>skip</code>: tạo phân trang cơ bản.</li>
+      <li><code>where</code>: chỉ thêm điều kiện <code>status</code> khi admin thực sự truyền bộ lọc.</li>
+      <li><code>Promise.all([...])</code>: lấy danh sách đơn và tổng số lượng song song để giảm thời gian chờ.</li>
+      <li><code>AdminOrderResponseDto</code>: chuyển đổi dữ liệu Prisma sang dạng response ổn định hơn, đặc biệt là biến các số kiểu Decimal thành chuỗi.</li>
+    </ul>
+
+    <p>Khi cập nhật trạng thái đơn hàng, service sẽ kiểm tra đơn có tồn tại trước rồi mới <code>update</code>.</p>
+
+    <h2>4. DTO (<code>src/admin/dto</code>) - Hàng rào kiểm tra dữ liệu</h2>
+
+    <p>DTO giúp chặn dữ liệu bẩn ngay từ lớp controller trước khi chạm vào service.</p>
+
+    <h3><code>product.dto.ts</code></h3>
+
+<pre data-lang="typescript"><code>
+<span class="kw">export class</span> <span class="typ">CreateProductDto</span> {
+  <span class="dec">@IsString</span>()
+  name!: <span class="typ">string</span>;
+
+  <span class="dec">@IsString</span>()
+  price!: <span class="typ">string</span>;
+
+  <span class="dec">@Type</span>(() => <span class="typ">Number</span>)
+  <span class="dec">@IsInt</span>()
+  <span class="dec">@Min</span>(<span class="num">0</span>)
+  stock!: <span class="typ">number</span>;
+}
+</code></pre>
+
+    <p>Một số chi tiết cần để ý:</p>
+
+    <ul>
+      <li><code>price</code> đang được nhận dưới dạng <code>string</code>, không phải <code>number</code>. Sau đó service mới chuyển sang <code>Prisma.Decimal</code>.</li>
+      <li><code>stock</code> dùng <code>@Type(() => Number)</code> để ép kiểu từ dữ liệu HTTP sang số trước khi validate.</li>
+      <li><code>categoryId</code> phải là số nguyên dương.</li>
+      <li><code>status</code> chỉ chấp nhận giá trị thuộc enum <code>ProductStatus</code>.</li>
+      <li><code>images</code> là mảng object lồng nhau nên cần <code>@ValidateNested({ each: true })</code>.</li>
+    </ul>
+
+    <h3><code>category.dto.ts</code></h3>
+
+    <p>DTO danh mục đơn giản hơn, chỉ gồm <code>name</code>, <code>slug</code>, <code>description</code>, trong đó <code>description</code> là tùy chọn.</p>
+
+    <h3><code>order.dto.ts</code></h3>
+
+    <p>File này phục vụ 3 mục tiêu:</p>
+
+    <ul>
+      <li><code>AdminOrderQueryDto</code>: nhận query filter và kế thừa phân trang.</li>
+      <li><code>UpdateOrderStatusDto</code>: chỉ cho phép đổi sang giá trị hợp lệ của <code>OrderStatus</code>.</li>
+      <li><code>AdminOrderResponseDto</code>: chuẩn hóa dữ liệu trả về cho API quản trị đơn hàng.</li>
+    </ul>
+
+    <h2>5. Cache và tính nhất quán dữ liệu</h2>
+
+    <p>Khi admin thay đổi danh mục hoặc sản phẩm, service sẽ chủ động xóa cache:</p>
+
+<pre data-lang="typescript"><code>
+<span class="kw">private async</span> <span class="fn">invalidateCategoryCache</span>() {
+  <span class="kw">await</span> <span class="kw">this</span>.redisService.<span class="fn">del</span>(<span class="typ">CACHE_KEYS</span>.<span class="typ">CATEGORIES</span>);
+  <span class="kw">await</span> <span class="kw">this</span>.redisService.<span class="fn">reset</span>();
+}
+</code></pre>
+
+<pre data-lang="typescript"><code>
+<span class="kw">private async</span> <span class="fn">invalidateProductCache</span>(oldSlug?: <span class="typ">string</span>, newSlug?: <span class="typ">string</span>) {
+  <span class="kw">await</span> <span class="kw">this</span>.redisService.<span class="fn">reset</span>();
+
+  <span class="kw">if</span> (oldSlug) {
+    <span class="kw">await</span> <span class="kw">this</span>.redisService.<span class="fn">del</span>(<span class="typ">CACHE_KEYS</span>.<span class="fn">PRODUCT</span>(oldSlug));
+  }
+
+  <span class="kw">if</span> (newSlug && newSlug !== oldSlug) {
+    <span class="kw">await</span> <span class="kw">this</span>.redisService.<span class="fn">del</span>(<span class="typ">CACHE_KEYS</span>.<span class="fn">PRODUCT</span>(newSlug));
+  }
+}
+</code></pre>
+
+    <p>Ý nghĩa của việc này:</p>
+
+    <ul>
+      <li>tránh việc frontend đọc lại dữ liệu cũ sau khi admin vừa sửa;</li>
+      <li>nếu slug sản phẩm đổi, cache theo slug cũ và slug mới đều được dọn;</li>
+      <li><code>reset()</code> cho thấy hệ thống ưu tiên tính đúng đắn dữ liệu hơn là giữ cache quá lâu.</li>
+    </ul>
+
+    <h2>6. Tóm tắt luồng hoạt động</h2>
+
+    <p>Luồng tổng quát của module admin là:</p>
+
+    <ol>
+      <li>Request đi vào <code>AdminController</code>.</li>
+      <li><code>AuthGuard</code> xác thực người dùng, <code>RolesGuard</code> kiểm tra role admin.</li>
+      <li>DTO validate dữ liệu đầu vào.</li>
+      <li><code>AdminService</code> xử lý nghiệp vụ với Prisma.</li>
+      <li>Nếu dữ liệu ảnh hưởng đến catalog, Redis cache sẽ bị xóa.</li>
+      <li>Response trả về theo format chung bằng <code>success(...)</code> hoặc <code>paginated(...)</code>.</li>
+    </ol>
+
+    <p>Nói ngắn gọn, <code>src/admin</code> chính là lớp điều khiển vận hành cho phần backoffice: chỉ admin mới được vào, mọi thay đổi quan trọng đều được kiểm tra, ghi log, và đồng bộ lại cache để phần khách hàng nhìn thấy dữ liệu mới nhất. </p>
+  </div>
+</body>
+</html>

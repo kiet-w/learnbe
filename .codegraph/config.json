@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "maxFileSize": 524288,
+  "languages": [
+    "typescript",
+    "javascript"
+  ],
+  "exclude": [
+    "**/.vscode/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.git/**",
+    "**/tmp/**",
+    "**/*.min.js",
+    "**/*.map"
+  ]
+}

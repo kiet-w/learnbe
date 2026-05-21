@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NestJS Gastronomy Engine 2.0 | Automated Backend Factory</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0b0d;
+            --surface: #121418;
+            --surface-accent: #1c1f26;
+            --border: #2d333d;
+            --text: #e2e8f0;
+            --text-dim: #64748b;
+            --primary: #0ea5e9; /* Sky Blue - Flow */
+            --secondary: #d946ef; /* Magenta - Sensors */
+            --success: #10b981; /* Emerald - Validation */
+            --warning: #f59e0b; /* Amber - Security */
+            --danger: #ef4444;  /* Rose - Emergency */
+            --metal: linear-gradient(145deg, #2d333d, #1c1f26);
+            --node-w: 180px;
+            --node-h: 70px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Industrial Sidebar */
+        #inspector {
+            width: 440px;
+            background: var(--surface);
+            border-right: 2px solid #000;
+            box-shadow: inset -10px 0 20px rgba(0,0,0,0.5);
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            z-index: 100;
+            overflow-y: auto;
+        }
+
+        #inspector h1 { 
+            font-size: 1.6rem; 
+            font-weight: 800; 
+            color: var(--primary); 
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            border-left: 4px solid var(--primary);
+            padding-left: 15px;
+        }
+        
+        #inspector h2 { 
+            font-size: 0.75rem; 
+            color: var(--text-dim); 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            background: #000;
+            padding: 4px 10px;
+            display: inline-block;
+            border-radius: 4px;
+        }
+
+        #inspector-content { 
+            line-height: 1.7; 
+            font-size: 0.95rem; 
+            color: #cbd5e1; 
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        #inspector-content b { color: var(--primary); }
+        .hint { font-size: 0.8rem; color: var(--text-dim); background: #000; padding: 10px; border-radius: 6px; border: 1px solid #222; }
+
+        /* Factory Floor Canvas */
+        main {
+            flex-grow: 1;
+            position: relative;
+            overflow: auto;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 50px 50px;
+            background-color: #08090a;
+        }
+
+        #canvas {
+            position: relative;
+            width: 1700px;
+            height: 1000px;
+            padding: 80px;
+        }
+
+        /* Mechanical Node Styling */
+        .node {
+            position: absolute;
+            width: var(--node-w);
+            height: var(--node-h);
+            background: var(--metal);
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 10;
+            box-shadow: 4px 4px 0px #000;
+        }
+
+        .node::before {
+            content: "";
+            position: absolute;
+            top: 4px; left: 4px; right: 4px; bottom: 4px;
+            border: 1px solid rgba(255,255,255,0.05);
+            pointer-events: none;
+        }
+
+        .node:hover {
+            border-color: var(--primary);
+            box-shadow: 6px 6px 0px var(--primary);
+            transform: translate(-2px, -2px);
+        }
+
+        .node.active {
+            border-color: var(--primary);
+            background: #1e293b;
+            box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
+        }
+
+        .node-tag { 
+            font-size: 0.55rem; 
+            color: var(--text-dim); 
+            text-transform: uppercase; 
+            background: #000;
+            padding: 1px 6px;
+            margin-bottom: 4px;
+            border-radius: 2px;
+        }
+
+        /* Machinery Grouping */
+        .machinery-zone {
+            position: absolute;
+            border: 2px solid #1a1c20;
+            background: repeating-linear-gradient(45deg, #0d0e11, #0d0e11 10px, #0f1014 10px, #0f1014 20px);
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
+        .zone-header {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            color: #2d333d;
+            font-size: 1.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 10px;
+            opacity: 0.5;
+        }
+
+        /* Animated Conveyor Belts (SVG) */
+        svg#factory-lines {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        path.conveyor {
+            fill: none;
+            stroke: #1a1c20;
+            stroke-width: 12;
+            stroke-linecap: round;
+        }
+
+        path.belt-track {
+            fill: none;
+            stroke: #2d333d;
+            stroke-width: 2;
+            stroke-dasharray: 8 12;
+            animation: move-belt 1s linear infinite;
+        }
+
+        path.belt-track.highlight {
+            stroke: var(--primary);
+            stroke-width: 3;
+            filter: drop-shadow(0 0 5px var(--primary));
+        }
+
+        @keyframes move-belt {
+            from { stroke-dashoffset: 20; }
+            to { stroke-dashoffset: 0; }
+        }
+
+        /* Specific Machinery Placements */
+        #m-client { left: 60px; top: 450px; border-style: dashed; }
+        #m-middleware { left: 300px; top: 450px; }
+        #m-guard { left: 540px; top: 450px; border-color: var(--warning); }
+        #m-interceptor-pre { left: 780px; top: 450px; border-color: var(--secondary); }
+        #m-pipe { left: 1020px; top: 450px; border-color: var(--success); }
+        #m-controller { left: 1260px; top: 450px; }
+        #m-service { left: 1260px; top: 620px; border: 4px solid var(--primary); width: 200px; height: 100px; font-size: 1rem; }
+
+        /* Data Storage Vaults */
+        #m-redis { left: 1520px; top: 520px; border-color: var(--success); }
+        #m-prisma { left: 1520px; top: 620px; border-color: var(--secondary); }
+        #m-postgres { left: 1520px; top: 720px; border-color: var(--primary); border-style: double; }
+
+        /* Return & Emergency */
+        #m-interceptor-post { left: 1020px; top: 280px; border-color: var(--secondary); }
+        #m-response { left: 60px; top: 280px; border-style: dashed; }
+        #m-filter { left: 780px; top: 120px; width: 420px; border-color: var(--danger); background: rgba(239, 68, 68, 0.05); }
+
+        /* Power & Control */
+        #m-main { left: 60px; top: 800px; }
+        #m-module { left: 300px; top: 800px; border-color: var(--text-dim); }
+        #m-ioc { left: 540px; top: 800px; border-color: var(--primary); box-shadow: 0 0 15px rgba(14, 165, 233, 0.2); }
+
+        /* Gear Decoration */
+        .gear {
+            position: absolute;
+            color: #1a1c20;
+            animation: rotate 10s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+
+    <aside id="inspector">
+        <header>
+            <h1>Gastronomy Engine</h1>
+            <h2>Machine Core Interface</h2>
+        </header>
+        
+        <div id="inspector-content">
+            <p>Hệ thống đang ở trạng thái <b>READY</b>.</p>
+            <br>
+            <p>Vận hành Cỗ Máy Nhà Hàng bằng cách chọn một module trên dây chuyền lắp ráp để xem thông số kỹ thuật và vai trò vận hành.</p>
+        </div>
+
+        <p class="hint">⚡ Click vào các bộ phận máy để chẩn đoán luồng dữ liệu.</p>
+
+        <div id="acid-gauge" style="display: none; margin-top: auto; padding: 1.5rem; background: #000; border: 2px solid var(--danger); position: relative;">
+            <div style="position: absolute; top: -10px; left: 10px; background: var(--danger); color: #fff; font-size: 0.6rem; font-weight: 900; padding: 2px 5px;">STABILITY PROTOCOL</div>
+            <h3 style="color: var(--danger); font-size: 0.8rem; margin-bottom: 0.75rem;">A.C.I.D SAFETY LOCKS</h3>
+            <ul style="font-size: 0.75rem; list-style: none; color: #888; font-family: 'JetBrains Mono';">
+                <li style="margin-bottom: 4px;">[A] ATOMICITY: COMPLETE OR VOID</li>
+                <li style="margin-bottom: 4px;">[C] CONSISTENCY: DATA INTEGRITY</li>
+                <li style="margin-bottom: 4px;">[I] ISOLATION: PROCESS LOCKING</li>
+                <li>[D] DURABILITY: HARDENED STORAGE</li>
+            </ul>
+        </div>
+    </aside>
+
+    <main>
+        <!-- Background Decorations -->
+        <div class="gear" style="top: 100px; right: 100px; font-size: 150px;">⚙️</div>
+        <div class="gear" style="bottom: 50px; right: 400px; font-size: 200px; animation-direction: reverse;">⚙️</div>
+        <div class="gear" style="top: 600px; left: 200px; font-size: 100px;">⚙️</div>
+
+        <div id="canvas">
+            <!-- Zones -->
+            <div class="machinery-zone" style="left: 260px; top: 100px; width: 1200px; height: 500px;">
+                <span class="zone-header">Assembly Line</span>
+            </div>
+            <div class="machinery-zone" style="left: 40px; top: 730px; width: 720px; height: 180px;">
+                <span class="zone-header">Power Grid</span>
+            </div>
+
+            <svg id="factory-lines">
+                <defs>
+                    <marker id="gear-arrow" markerWidth="8" markerHeight="8" refX="4" refY="4">
+                        <circle cx="4" cy="4" r="3" fill="#2d333d" />
+                    </marker>
+                </defs>
+                
+                <!-- Main Conveyor Belt Paths -->
+                <path class="conveyor" d="M 150 485 L 1350 485" />
+                <path class="belt-track highlight" d="M 150 485 L 1350 485" />
+                
+                <path class="conveyor" d="M 1350 485 L 1350 620" />
+                <path class="belt-track highlight" d="M 1350 485 L 1350 620" />
+
+                <!-- Return Belt -->
+                <path class="conveyor" d="M 1350 670 L 1110 315 L 150 315" />
+                <path class="belt-track highlight" d="M 1350 670 L 1110 315 L 150 315" />
+
+                <!-- Data Feed Lines -->
+                <path class="conveyor" d="M 1460 670 L 1520 555" />
+                <path class="belt-track" d="M 1460 670 L 1520 555" />
+                <path class="conveyor" d="M 1460 670 L 1520 655" />
+                <path class="belt-track" d="M 1460 670 L 1520 655" />
+                <path class="conveyor" d="M 1700 755 L 1520 755" />
+                <path class="belt-track" d="M 1700 755 L 1520 755" />
+
+                <!-- Power Lines -->
+                <path class="conveyor" d="M 540 835 L 480 835 L 240 835" />
+                <path class="belt-track" d="M 540 835 L 480 835 L 240 835" />
+            </svg>
+
+            <!-- Machine Modules -->
+            <div class="node" id="m-client" data-part="Input Terminal" data-title="Request / Client" data-content="<b>Client Terminal:</b> Điểm nạp nguyên liệu thô (Request). Máy sẽ nhận các kiện hàng Headers, Cookies và Body để đưa vào dây chuyền xử lý.">
+                <span class="node-tag">Station 0</span> Request IN
+            </div>
+            
+            <div class="node" id="m-middleware" data-part="Sanitization Gate" data-title="Middleware" data-content="<b>Cổng Xịt Khuẩn:</b> Trạm dừng đầu tiên. Máy quét sẽ dán tem xịt khuẩn, giải mã kiện hàng (<code>cookie-parser</code>) và ghi nhật ký IP. Nếu phát hiện spam, cổng sẽ đóng sập lại.">
+                <span class="node-tag">Station 1</span> Gate Scanner
+            </div>
+
+            <div class="node" id="m-guard" data-part="Security Firewall" data-title="Guard (Security)" data-content="<b>Hệ Thống An Ninh:</b> Robot bảo vệ kiểm tra vé thông hành JWT và cấp bậc nhân sự (Roles). Khách thường đòi vào kho VIP? Máy sẽ kích hoạt báo động và đẩy kiện hàng ra ngoài ngay lập tức.">
+                <span class="node-tag">Station 2</span> Bouncer Bot
+            </div>
+
+            <div class="node" id="m-interceptor-pre" data-part="Input Sensor" data-title="Interceptor (Pre)" data-content="<b>Cảm Biến Đầu Vào:</b> Bộ quay phim ghi hình tiền kỳ. Máy đo đạc thông số, ghi log thời gian bắt đầu và có thể 'nhúng' thêm dữ liệu đặc biệt vào kiện hàng trước khi đưa vào lò.">
+                <span class="node-tag">Station 3</span> Sensor Array
+            </div>
+
+            <div class="node" id="m-pipe" data-part="Data Mill & Sorter" data-title="Pipe (Validation)" data-content="<b>Máy Xay & Phân Loại:</b> Kiểm toán tờ phiếu order (DTO). Nếu sai format, máy sẽ nghiền nát kiện hàng (Error 400). <b>Tính năng Pro:</b> Tự động ép khuôn lại dữ liệu (vd: ép '123' thành số 123) để lò phản ứng dễ xử lý.">
+                <span class="node-tag">Station 4</span> Data Mill
+            </div>
+
+            <div class="node" id="m-controller" data-part="Dispatcher Arm" data-title="Controller" data-content="<b>Tay Gắp Điều Phối:</b> Chỉ làm nhiệm vụ trung chuyển. Nhận kiện hàng đã được làm sạch và phân loại, sau đó gắp bỏ vào đúng lò phản ứng chuyên dụng. Không trực tiếp tham gia chế biến.">
+                <span class="node-tag">Station 5</span> Dispatcher
+            </div>
+
+            <div class="node" id="m-service" data-part="Main Reactor Core" data-title="Service (Logic)" data-content="<b>Lò Phản Ứng Trung Tâm:</b> Nơi xào nấu logic nghiệp vụ. Khi thiếu năng lượng/dữ liệu, lò sẽ hút từ Tủ lạnh (Redis) hoặc triệu hồi Trưởng phòng vật tư mở Kho Hầm (Prisma).">
+                <span class="node-tag">PROCESSOR</span> CORE REACTOR
+            </div>
+
+            <div class="node" id="m-interceptor-post" data-part="Output Quality Control" data-title="Interceptor (Post)" data-content="<b>Máy Kiểm Tra Thành Phẩm:</b> Đĩa thức ăn bưng ra sẽ được quét qua lần cuối. Máy sẽ tự động gỡ bỏ các linh kiện nhạy cảm (vd: <code>password</code>) để đảm bảo an toàn trước khi bưng tới bàn khách.">
+                <span class="node-tag">Station 6</span> QC Scanner
+            </div>
+
+            <div class="node" id="m-filter" data-part="Emergency Coolant" data-title="Exception Filter" data-content="<b>Hệ Thống Cứu Hỏa:</b> Túc trực toàn thời gian trên mọi Station. Bất kể lò nổ, scanner cháy hay bouncer đánh khách, hệ thống sẽ phun bọt chữa cháy, đóng gói sự cố và đưa ra thông báo lịch sự cho khách hàng.">
+                <span class="node-tag">GLOBAL SAFETY</span> EMERGENCY SYSTEM
+            </div>
+
+            <div class="node" id="m-response" data-part="Output Terminal" data-title="Response" data-content="<b>Thành Phẩm:</b> Kiện hàng cuối cùng đã được xử lý, làm sạch và đóng gói đẹp mắt để trả về cho Client.">
+                <span class="node-tag">Final</span> Product OUT
+            </div>
+
+            <!-- Supply Vaults -->
+            <div class="node" id="m-redis" data-part="Cryo-Fridge" data-title="Redis (Cache)" data-content="<b>Tủ Cấp Đông:</b> Chứa nguyên liệu làm sẵn tốc độ cao. Truy xuất tức thì nhưng nếu mất điện lưới là toàn bộ nguyên liệu sẽ bốc hơi.">
+                Cryo Cache
+            </div>
+
+            <div class="node" id="m-prisma" data-part="Vault Manager" data-title="Prisma (ORM)" data-content="<b>Quản Lý Hầm:</b> Người nắm chìa khóa và bản đồ schema.prisma. Chuyên vận hành hệ thống xe đẩy dẫn xuống kho dữ liệu khổng lồ PostgreSQL.">
+                Vault Manager
+            </div>
+
+            <div class="node" id="m-postgres" data-part="Deep Storage Vault" data-title="PostgreSQL (DB)" data-content="<b>Kho Hầm Vĩnh Cửu:</b> Lưu trữ dữ liệu an toàn dưới lớp vỏ bọc dày. Bất chấp mọi thảm họa ở tầng trên, dữ liệu ở đây vẫn được bảo toàn.">
+                Primary Vault
+            </div>
+
+            <!-- Power & Logic -->
+            <div class="node" id="m-main" data-part="Ignition Key" data-title="main.ts" data-content="<b>Chìa Khóa Khởi Động:</b> Kích hoạt nguồn điện cho toàn bộ nhà máy. Thiết lập các thông số môi trường ban đầu.">
+                Startup Key
+            </div>
+
+            <div class="node" id="m-module" data-part="Blueprints" data-title="app.module.ts" data-content="<b>Bản Vẽ Thiết Kế:</b> Tập hồ sơ ghi rõ nhà máy có bao nhiêu phân xưởng, robot nào cần công cụ gì. Bản thân nó không chạy, nó là tài liệu hướng dẫn.">
+                Blueprints
+            </div>
+
+            <div class="node" id="m-ioc" data-part="Central Power Grid" data-title="IoC Runtime" data-content="<b>Lưới Điện Trung Tâm:</b> Đọc bản vẽ Module và thực hiện việc cấp phát năng lượng/công cụ (DI) cho các robot có gắn chip @Injectable. Điều hành toàn bộ sự sống của nhà máy.">
+                Power Grid
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const nodes = document.querySelectorAll('.node');
+        const inspectorContent = document.getElementById('inspector-content');
+        const inspectorTitle = document.querySelector('#inspector h1');
+        const inspectorPart = document.querySelector('#inspector h2');
+        const acidGauge = document.getElementById('acid-gauge');
+
+        nodes.forEach(node => {
+            node.addEventListener('click', () => {
+                // Visual feedback
+                nodes.forEach(n => n.classList.remove('active'));
+                node.classList.add('active');
+
+                // Content extraction
+                const part = node.getAttribute('data-part');
+                const title = node.getAttribute('data-title');
+                const content = node.getAttribute('data-content');
+
+                // Inspector update
+                inspectorTitle.innerText = title;
+                inspectorPart.innerText = `Machine Part: ${part}`;
+                inspectorContent.innerHTML = content;
+
+                // Safety Gauge Toggle
+                if (['m-service', 'm-prisma', 'm-postgres'].includes(node.id)) {
+                    acidGauge.style.display = 'block';
+                } else {
+                    acidGauge.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

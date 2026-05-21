@@ -1,0 +1,15 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "codebase-analyzer"
+version = "0.1.0"
+description = "CocoIndex pipeline to analyze NestJS codebase"
+requires-python = ">=3.10"
+dependencies = [
+    "cocoindex>=1.0.0",
+    "litellm",
+    "instructor",
+    "pydantic>=2.0"
+]

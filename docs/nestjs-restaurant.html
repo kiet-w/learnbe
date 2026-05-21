@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NestJS Enterprise Mental Model | The High-End Restaurant</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #1e293b;
+            --panel-hover: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-primary: #3b82f6; /* Blue - Core */
+            --accent-success: #10b981; /* Green - Flow */
+            --accent-warning: #f59e0b; /* Yellow - Security */
+            --accent-danger: #ef4444;  /* Red - Error */
+            --accent-purple: #8b5cf6;  /* Purple - DB */
+            --border: rgba(255, 255, 255, 0.1);
+            --radius: 1rem;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --glass: rgba(30, 41, 59, 0.7);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 2rem;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        /* Bento Grid Layout */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: auto;
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        /* Specific Card Styles */
+        .card-pipeline {
+            grid-column: span 4;
+            background: linear-gradient(to right, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.8));
+        }
+
+        .card-di {
+            grid-column: span 2;
+        }
+
+        .card-supply {
+            grid-column: span 2;
+        }
+
+        .card-acid {
+            grid-column: span 4;
+        }
+
+        /* Pipeline Flow Visualization */
+        .pipeline-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 0.75rem;
+            overflow-x: auto;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 100px;
+            position: relative;
+        }
+
+        .step:not(:last-child)::after {
+            content: "→";
+            position: absolute;
+            right: -25px;
+            top: 15px;
+            color: var(--text-muted);
+            font-weight: bold;
+        }
+
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            background: var(--panel);
+            border: 1px solid var(--border);
+        }
+
+        .step-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        /* HR/DI Visualization */
+        .di-visual {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .di-box {
+            flex: 1;
+            padding: 1rem;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 0.75rem;
+            text-align: center;
+        }
+
+        .di-box h3 { font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--accent-primary); }
+        .di-box p { font-size: 0.8rem; margin: 0; }
+
+        /* ACID List */
+        .acid-list {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .acid-item {
+            padding: 1rem;
+            background: rgba(139, 92, 246, 0.05);
+            border: 1px dashed rgba(139, 92, 246, 0.3);
+            border-radius: 0.75rem;
+        }
+
+        .acid-letter {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--accent-purple);
+            margin-bottom: 0.25rem;
+        }
+
+        .acid-title { font-weight: 700; margin-bottom: 0.5rem; }
+        .acid-desc { font-size: 0.8rem; color: var(--text-muted); }
+
+        /* Utility Colors */
+        .bg-blue { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+        .bg-green { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+        .bg-yellow { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+        .bg-red { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+        .bg-purple { background: rgba(139, 92, 246, 0.2); color: #c4b5fd; }
+
+        .border-blue { border-color: var(--accent-primary) !important; }
+        .border-green { border-color: var(--accent-success) !important; }
+        .border-yellow { border-color: var(--accent-warning) !important; }
+        .border-red { border-color: var(--accent-danger) !important; }
+
+        @media (max-width: 1024px) {
+            .bento-grid { grid-template-columns: repeat(2, 1fr); }
+            .card-pipeline, .card-acid { grid-column: span 2; }
+        }
+
+        @media (max-width: 768px) {
+            .bento-grid { grid-template-columns: 1fr; }
+            .card-pipeline, .card-di, .card-supply, .card-acid { grid-column: span 1; }
+            .acid-list { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>NestJS Enterprise Mental Model</h1>
+            <p>Khám phá hệ thống backend theo mô phỏng "Tổ hợp Nhà Hàng Cao Cấp"</p>
+        </header>
+
+        <div class="bento-grid">
+            <!-- 1. Pipeline Section -->
+            <section class="card card-pipeline">
+                <span class="badge bg-green">Request Lifecycle</span>
+                <h2>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    Vòng Đời Phục Vụ Cố Định (The Pipeline)
+                </h2>
+                <p>Mọi order từ khách hàng đều phải đi qua một chuỗi các trạm kiểm soát nghiêm ngặt trước khi đến được bếp và quay trở lại bàn.</p>
+                
+                <div class="pipeline-flow">
+                    <div class="step">
+                        <div class="step-icon bg-blue">🏠</div>
+                        <div class="step-label">Middleware</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon bg-yellow">🛡️</div>
+                        <div class="step-label">Guard</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon bg-purple">📹</div>
+                        <div class="step-label">Interceptor (In)</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon bg-green">📋</div>
+                        <div class="step-label">Pipe</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon border-blue">👨‍🍳</div>
+                        <div class="step-label">Controller/Service</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon bg-purple">📹</div>
+                        <div class="step-label">Interceptor (Out)</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon bg-red">🚨</div>
+                        <div class="step-label">Exception Filter</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. Core & DI -->
+            <section class="card card-di">
+                <span class="badge bg-blue">Core Architecture</span>
+                <h2>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    Ban Quản Lý & Cấp Phát Nhân Sự (DI)
+                </h2>
+                <p>NestJS IoC Container hoạt động như một phòng HR chuyên nghiệp, tự động cấp phát công cụ cho nhân viên đeo thẻ <code>@Injectable()</code>.</p>
+                
+                <div class="di-visual">
+                    <div class="di-box">
+                        <h3>app.module.ts</h3>
+                        <p>Bản khai nhân sự & danh sách phòng ban.</p>
+                    </div>
+                    <div class="di-box" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2);">
+                        <h3>IoC Runtime</h3>
+                        <p>Phòng HR thực thi việc cấp phát chìa khóa/công cụ.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. Supply Chain -->
+            <section class="card card-supply">
+                <span class="badge bg-purple">Supply Chain</span>
+                <h2>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8V21H3V8"></path><path d="M1 3H23V8H1V3Z"></path><path d="M10 12H14"></path></svg>
+                    Chuỗi Cung Ứng (Prisma & Redis)
+                </h2>
+                <p>Bếp trưởng không tự đẻ ra nguyên liệu. Họ lấy từ tủ lạnh mini (Redis) hoặc nhờ Trưởng phòng vật tư (Prisma) xuống kho tổng.</p>
+                <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem;">
+                        <span style="font-size: 0.8rem; font-weight: bold;">redis.service.ts</span>
+                        <span style="font-size: 0.7rem; color: var(--accent-success);">Tủ lạnh Mini (Fast Cache)</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem;">
+                        <span style="font-size: 0.8rem; font-weight: bold;">prisma.service.ts</span>
+                        <span style="font-size: 0.7rem; color: var(--accent-purple);">Quản lý kho (Database)</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. ACID Transaction -->
+            <section class="card card-acid">
+                <span class="badge bg-red">Database Reliability</span>
+                <h2>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    Combo Đặc Biệt (ACID Transaction)
+                </h2>
+                <p>Khi bưng một mâm Combo 3 món, chúng ta cam kết tuân thủ 4 bộ luật an toàn <code>A.C.I.D</code> để đảm bảo dữ liệu không bao giờ bị lệch lạc.</p>
+                
+                <div class="acid-list">
+                    <div class="acid-item">
+                        <div class="acid-letter">A</div>
+                        <div class="acid-title">Atomicity</div>
+                        <div class="acid-desc">Toàn vẹn: Bưng đủ mâm hoặc hủy cả mâm (Rollback).</div>
+                    </div>
+                    <div class="acid-item">
+                        <div class="acid-letter">C</div>
+                        <div class="acid-title">Consistency</div>
+                        <div class="acid-desc">Nhất quán: Sau khi nấu, sổ sách và kho phải khớp.</div>
+                    </div>
+                    <div class="acid-item">
+                        <div class="acid-letter">I</div>
+                        <div class="acid-title">Isolation</div>
+                        <div class="acid-desc">Độc lập: Bàn A và Bàn B không giành giật thịt bò.</div>
+                    </div>
+                    <div class="acid-item">
+                        <div class="acid-letter">D</div>
+                        <div class="acid-title">Durability</div>
+                        <div class="acid-desc">Bền vững: In bill xong, mất điện vẫn không mất tiền.</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <footer style="margin-top: 4rem; text-align: center; color: var(--text-muted); font-size: 0.85rem; border-top: 1px solid var(--border); padding-top: 2rem;">
+            &copy; 2026 NestJS Learning Dashboard - Powered by UI/UX Pro Max Skill
+        </footer>
+    </div>
+
+</body>
+</html>
