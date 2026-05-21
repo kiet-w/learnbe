@@ -8,7 +8,7 @@ This project is a NestJS enterprise-grade starter repository serving as the foun
 - **Core Technology:** [NestJS](https://nestjs.com/) (Node.js framework) using TypeScript.
 - **Dashboard Stack:** HTML5, CSS (Dark Mode), Vanilla JavaScript, and Browser `localStorage` for progress persistence.
 - **Key Assets:**
-    - `learn`: The source Markdown file containing the 12-week enterprise roadmap, mindset, and detailed lessons.
+    - `docs/learning/LEARN.md`: The source Markdown file containing the 12-week enterprise roadmap, mindset, and detailed lessons.
     - `docs/superpowers/plans/`: Contains the implementation plan for the dashboard.
     - `docs/superpowers/specs/`: Contains the design specification for the dashboard.
 

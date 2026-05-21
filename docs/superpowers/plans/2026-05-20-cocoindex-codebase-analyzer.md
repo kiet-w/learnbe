@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a Python CocoIndex data pipeline that reads all NestJS `.ts` files and uses an LLM to generate a `src_explanation.md` file explaining the codebase.
+**Goal:** Build a Python CocoIndex data pipeline that reads all NestJS `.ts` files and uses an LLM to generate a `docs/explanations/src_explanation.md` file explaining the codebase.
 
 **Architecture:** A CocoIndex App scanning `src/**/*.ts` using `localfs`, processing each file with an LLM via `litellm` and `instructor`, and aggregating the results into a single Markdown file.
 
@@ -137,7 +137,7 @@ async def aggregate_results(outdir: pathlib.Path, project_root: pathlib.Path) ->
         md_content += f"**Highlights:** {analysis.highlights}\n\n"
         md_content += "---\n\n"
         
-    localfs.declare_file(project_root / "src_explanation.md", md_content, create_parent_dirs=True)
+    localfs.declare_file(project_root / "docs" / "explanations" / "src_explanation.md", md_content, create_parent_dirs=True)
 
 @coco.fn
 async def app_main(sourcedir: pathlib.Path, outdir: pathlib.Path, project_root: pathlib.Path) -> None:

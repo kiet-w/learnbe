@@ -158,7 +158,10 @@ export class CartService {
     });
   }
 
-  private async validateProductAvailability(productId: number, quantity: number) {
+  private async validateProductAvailability(
+    productId: number,
+    quantity: number,
+  ) {
     const product = await this.prisma.product.findUnique({
       where: { id: productId },
     });

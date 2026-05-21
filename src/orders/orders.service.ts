@@ -107,9 +107,7 @@ export class OrdersService {
           });
 
           if (updated.count !== 1) {
-            throw new BadRequestException(
-              `${item.product.name} không đủ hàng`,
-            );
+            throw new BadRequestException(`${item.product.name} không đủ hàng`);
           }
         }
 

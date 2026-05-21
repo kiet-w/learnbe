@@ -9,7 +9,11 @@ import { CACHE_KEYS } from '../common/constants/cache.constants';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
-import { AdminOrderQueryDto, AdminOrderResponseDto, UpdateOrderStatusDto } from './dto/order.dto';
+import {
+  AdminOrderQueryDto,
+  AdminOrderResponseDto,
+  UpdateOrderStatusDto,
+} from './dto/order.dto';
 import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
 
 @Injectable()
@@ -90,11 +94,7 @@ export class AdminService {
     return product;
   }
 
-  async updateProduct(
-    adminUserId: number,
-    id: number,
-    dto: UpdateProductDto,
-  ) {
+  async updateProduct(adminUserId: number, id: number, dto: UpdateProductDto) {
     const existing = await this.ensureProductExists(id);
 
     if (dto.categoryId) {

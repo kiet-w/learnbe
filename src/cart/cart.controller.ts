@@ -57,10 +57,7 @@ export class CartController {
     @Req() request: Request & { user: JwtPayloadDto },
     @Param('id', ParseIntPipe) id: number,
   ) {
-    const cart = await this.cartService.removeItem(
-      request.user.userId,
-      id,
-    );
+    const cart = await this.cartService.removeItem(request.user.userId, id);
     return success(cart);
   }
 

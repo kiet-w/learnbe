@@ -8,23 +8,15 @@ const ADMIN_EMAIL = 'admin@example.com';
 const DEFAULT_PASSWORD = 'password123';
 const TEST_PRODUCT_PREFIX = 'e2e-product-';
 
-export async function loginAsCustomer(
-  app: INestApplication,
-) {
+export async function loginAsCustomer(app: INestApplication) {
   return login(app, CUSTOMER_EMAIL, DEFAULT_PASSWORD);
 }
 
-export async function loginAsAdmin(
-  app: INestApplication,
-) {
+export async function loginAsAdmin(app: INestApplication) {
   return login(app, ADMIN_EMAIL, DEFAULT_PASSWORD);
 }
 
-async function login(
-  app: INestApplication,
-  email: string,
-  password: string,
-) {
+async function login(app: INestApplication, email: string, password: string) {
   const agent = request.agent(app.getHttpServer());
   await agent.post('/auth/login').send({ email, password }).expect(201);
   return agent;

@@ -1,4 +1,4 @@
-@RTK.md
+@docs/guides/RTK.md
 
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence

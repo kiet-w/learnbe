@@ -15,7 +15,10 @@ describe('Catalog E2E', () => {
   });
 
   it('GET / returns the root response', async () => {
-    await request(app.getHttpServer()).get('/').expect(200).expect('Hello World!');
+    await request(app.getHttpServer())
+      .get('/')
+      .expect(200)
+      .expect('Hello World!');
   });
 
   it('GET /categories returns seeded categories', async () => {

@@ -92,7 +92,10 @@ export class AuthService {
     }
     let payload: JwtPayloadDto;
     try {
-      payload = jwt.verify(refreshToken, this.JWT_REFRESH_SECRET) as JwtPayloadDto;
+      payload = jwt.verify(
+        refreshToken,
+        this.JWT_REFRESH_SECRET,
+      ) as JwtPayloadDto;
     } catch (err) {
       if (err instanceof jwt.TokenExpiredError) {
         throw new UnauthorizedException('Refresh Token đã hết hạn');
@@ -103,7 +106,11 @@ export class AuthService {
     const user = await this.userService.findById(payload.userId);
 
     // ✅ Fix: dùng bcrypt.compare thay vì !== vì token đã được hash
-    if (!user || !user.refreshToken || !(await bcrypt.compare(refreshToken, user.refreshToken))) {
+    if (
+      !user ||
+      !user.refreshToken ||
+      !(await bcrypt.compare(refreshToken, user.refreshToken))
+    ) {
       throw new UnauthorizedException('Refresh Token không hợp lệ');
     }
 
@@ -119,13 +126,16 @@ export class AuthService {
     response: Response,
   ): Promise<AuthResponseDto> {
     if (accessToken) {
-      const payload = this.validateAccessToken(accessToken) as JwtPayloadDto | null;
+      const payload = this.validateAccessToken(
+        accessToken,
+      ) as JwtPayloadDto | null;
       if (payload) {
         await this.logout(payload.userId);
       }
     }
 
-    const isProduction = this.configService.get<string>('NODE_ENV') === 'production';
+    const isProduction =
+      this.configService.get<string>('NODE_ENV') === 'production';
     const cookieOptions = {
       httpOnly: true,
       secure: isProduction,
@@ -142,7 +152,8 @@ export class AuthService {
     await this.userService.update(userId, { refreshToken: null });
   }
   private setCookies(response: Response, tokens: TokenDto): void {
-    const isProduction = this.configService.get<string>('NODE_ENV') === 'production';
+    const isProduction =
+      this.configService.get<string>('NODE_ENV') === 'production';
 
     response.cookie('access_token', tokens.accessToken, {
       httpOnly: true,
@@ -164,22 +175,29 @@ export class AuthService {
     email: string,
     role: UserRole,
   ): TokenDto {
-    const accessToken = jwt.sign({ userId, email, role }, this.JWT_ACCESS_SECRET, {
-      expiresIn: '15m',
-    });
+    const accessToken = jwt.sign(
+      { userId, email, role },
+      this.JWT_ACCESS_SECRET,
+      {
+        expiresIn: '15m',
+      },
+    );
 
     const refreshToken = jwt.sign(
       { userId, email, role },
       this.JWT_REFRESH_SECRET,
       {
-      expiresIn: '7d',
+        expiresIn: '7d',
       },
     );
 
     return { accessToken, refreshToken };
   }
 
-  private async updateRefreshToken(userId: number, refreshToken: string): Promise<void> {
+  private async updateRefreshToken(
+    userId: number,
+    refreshToken: string,
+  ): Promise<void> {
     // ✅ Fix: hash refresh token trước khi lưu DB
     const hashed = await bcrypt.hash(refreshToken, 10);
     await this.userService.update(userId, { refreshToken: hashed });
