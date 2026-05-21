@@ -4,11 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>User Module - Giải Thích Chuyên Sâu</title>
-  <style>/* === PASTE FULL CSS BLOCK BÊN DƯỚI === */
-/* ── VSCode Dark Theme ── */
-/* ═══════════════════════════════════════════
-   VSCode Dark Theme — NestJS Doc Renderer
-   ═══════════════════════════════════════════ */
+  <style>
+/* === CSS BLOCK === */
 :root {
   --bg:            #1e1e1e;
   --bg-sidebar:    #252526;
@@ -19,12 +16,10 @@
   --border:        #404040;
   --border-light:  #3c3c3c;
 
-
   --text:          #d4d4d4;
   --text-muted:    #858585;
   --text-bright:   #ffffff;
   --text-dim:      #6a6a6a;
-
 
   /* VSCode syntax colors */
   --kw:   #569cd6;   /* keywords: export, const, async, return */
@@ -37,7 +32,6 @@
   --prop: #9cdcfe;   /* properties, params */
   --op:   #d4d4d4;   /* operators */
 
-
   /* Semantic accent colors */
   --accent:  #007acc;
   --green:   #4ec9b0;
@@ -45,7 +39,6 @@
   --orange:  #ce9178;
   --red:     #f44747;
   --purple:  #c586c0;
-
 
   /* Lifecycle node colors */
   --node-guard:       #1a3a52;
@@ -64,9 +57,7 @@
   --node-err-b:       #f44747;
 }
 
-
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
 
 body {
   background: var(--bg);
@@ -77,10 +68,8 @@ body {
   overflow-x: hidden;
 }
 
-
 /* ── LAYOUT ── */
 .page-wrap { display: flex; min-height: 100vh; }
-
 
 .sidebar {
   width: 260px;
@@ -119,8 +108,6 @@ body {
 .toc-h1 { font-weight: 600; color: var(--text); }
 .toc-h2 { padding-left: 24px; }
 .toc-h3 { padding-left: 36px; font-size: 11.5px; }
-.toc-h4 { padding-left: 48px; font-size: 11px; }
-
 
 .content {
   flex: 1;
@@ -128,7 +115,6 @@ body {
   padding: 48px 52px 100px;
   min-width: 0;
 }
-
 
 /* ── HEADINGS ── */
 h1,h2,h3,h4,h5,h6 {
@@ -143,16 +129,13 @@ h2 { font-size: 1.45em; border-bottom: 1px solid var(--border); padding-bottom: 
 h3 { font-size: 1.2em; color: var(--yellow); }
 h4 { font-size: 1.05em; color: var(--prop); }
 
-
 /* ── BODY TEXT ── */
 p { margin: .7em 0; }
 strong { color: var(--text-bright); font-weight: 600; }
 em { font-style: italic; color: var(--orange); }
-del { color: var(--text-muted); text-decoration: line-through; }
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
-
 
 /* ── INLINE CODE ── */
 code {
@@ -164,7 +147,6 @@ code {
   padding: .15em .45em;
   color: var(--prop);
 }
-
 
 /* ── CODE BLOCKS ── */
 pre {
@@ -198,15 +180,8 @@ pre {
 }
 pre code {
   display: block;
-  background: none;
-  border: none;
-  padding: 18px 20px;
-  font-size: .875em;
-  line-height: 1.65;
-  color: var(--text);
-  overflow-x: auto;
+  background: none; border: none; padding: 18px 20px; font-size: .875em; line-height: 1.65; color: var(--text); overflow-x: auto;
 }
-
 
 /* Syntax token colors */
 .kw  { color: var(--kw); }
@@ -218,40 +193,6 @@ pre code {
 .dec { color: var(--dec); }
 .prop{ color: var(--prop); }
 
-
-/* Decorator annotation tooltip */
-.dec-ann {
-  position: relative;
-  display: inline;
-}
-.dec-ann .ann-tip {
-  display: none;
-  position: absolute;
-  left: 0; top: 1.6em;
-  background: var(--bg-surface2);
-  border: 1px solid var(--dec);
-  border-radius: 6px;
-  padding: 8px 12px;
-  font-size: 11.5px;
-  color: var(--text);
-  white-space: nowrap;
-  z-index: 99;
-  min-width: 200px;
-  line-height: 1.5;
-  font-style: normal;
-  font-family: -apple-system, sans-serif;
-  pointer-events: none;
-}
-.dec-ann:hover .ann-tip { display: block; }
-.dec-ann > .dec { border-bottom: 1px dashed var(--dec); cursor: help; }
-
-
-/* ── LISTS ── */
-ul, ol { padding-left: 1.8em; margin: .7em 0; }
-li { margin: .3em 0; }
-li > ul, li > ol { margin: .25em 0; }
-
-
 /* ── TABLES ── */
 table { width: 100%; border-collapse: collapse; margin: 1.2em 0; font-size: 13px; }
 thead { background: var(--bg-surface2); }
@@ -259,138 +200,290 @@ th { color: var(--text-bright); font-weight: 600; text-align: left; padding: 9px
 td { padding: 7px 14px; border: 1px solid var(--border); }
 tr:hover td { background: var(--bg-hover); }
 
+/* ── MODULE PANEL ── */
+.module-panel { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin: 1.5em 0; }
+.module-panel-header { background: var(--bg-surface2); padding: 14px 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
+.module-panel-icon { font-size: 18px; }
+.module-panel-name { font-size: 15px; font-weight: 600; color: var(--text-bright); }
+.module-panel-path { font-size: 11px; font-family: monospace; color: var(--text-muted); margin-left: auto; }
+.file-tabs { display: flex; background: var(--bg-surface2); border-bottom: 1px solid var(--border); overflow-x: auto; }
+.file-tab { padding: 8px 18px; font-size: 12px; font-family: monospace; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all .15s; user-select: none; }
+.file-tab:hover { color: var(--text); background: var(--bg-hover); }
+.file-tab.active { color: var(--text-bright); border-bottom-color: var(--accent); background: var(--bg-surface); }
+.file-pane { display: none; padding: 20px 24px; }
+.file-pane.active { display: block; }
 
-/* ── BLOCKQUOTE ── */
-blockquote {
-  margin: 1em 0;
-  padding: 12px 18px;
-  border-left: 3px solid var(--accent);
-  background: var(--bg-surface);
-  border-radius: 0 6px 6px 0;
-  color: var(--text-muted);
-}
-blockquote p { margin: 0; }
+/* ── DECORATOR CARD ── */
+.dec-card { display: flex; gap: 12px; align-items: flex-start; background: var(--bg-surface2); border: 1px solid var(--border); border-left: 3px solid var(--dec); border-radius: 6px; padding: 12px 16px; margin: 10px 0; font-size: 13px; }
+.dec-card-name { font-family: monospace; font-size: 13px; color: var(--dec); font-weight: 600; min-width: 130px; }
+.dec-card-body { flex: 1; }
+.dec-card-desc { color: var(--text); margin-bottom: 4px; }
+.dec-card-effect { font-size: 12px; color: var(--text-muted); }
+.dec-card-effect b { color: var(--prop); font-weight: normal; }
 
+/* ── CRUD CARD ── */
+.crud-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; overflow: hidden; }
+.crud-header { display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: var(--bg-surface2); border-bottom: 1px solid var(--border); }
+.crud-method { font-size: 11px; font-weight: 700; letter-spacing: .06em; padding: 3px 10px; border-radius: 4px; font-family: monospace; }
+.method-get    { background: #1a3a28; color: #4ec9b0; }
+.method-post   { background: #1a2d0d; color: #89d185; }
+.method-patch  { background: #2d2207; color: #dcdcaa; }
+.method-delete { background: #2d0a0a; color: #f44747; }
+.crud-path { font-family: monospace; font-size: 13px; color: var(--text); }
+.crud-fn   { font-family: monospace; font-size: 12px; color: var(--fn); margin-left: auto; }
+.crud-body { padding: 14px 16px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.crud-col-title { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; }
+.crud-col-content { font-size: 12px; color: var(--text); line-height: 1.55; }
+.crud-effects { padding: 0 16px 14px; }
+.crud-effects-title { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); margin-bottom: 6px; }
+.effect-tag { display: inline-flex; align-items: center; gap: 5px; background: var(--bg-surface2); border: 1px solid var(--border); border-radius: 4px; padding: 3px 10px; font-size: 11.5px; font-family: monospace; margin: 3px 4px 3px 0; color: var(--text-muted); }
+.effect-tag.db-write { border-color: var(--kw); color: var(--kw); }
+.effect-tag.db-read { border-color: var(--green); color: var(--green); }
+.effect-tag.cache-inv { border-color: var(--yellow); color: var(--yellow); }
 
-/* ── CALLOUT BOXES ── */
-.callout {
-  border-radius: 6px;
-  padding: 14px 18px;
-  margin: 1.2em 0;
-  border-left: 4px solid;
-  font-size: 13.5px;
-}
-.callout-note    { background: #0d2137; border-color: var(--accent); }
-.callout-warn    { background: #2d2207; border-color: var(--yellow); }
-.callout-danger  { background: #2d0a0a; border-color: var(--red); }
-.callout-tip     { background: #0d2117; border-color: var(--green); }
-.callout-title   { font-weight: 700; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 6px; }
-.callout-note .callout-title    { color: var(--accent); }
-.callout-warn .callout-title    { color: var(--yellow); }
-.callout-danger .callout-title  { color: var(--red); }
-.callout-tip .callout-title     { color: var(--green); }
+/* ═══════════════════════════════════════════
+   REQUEST LIFECYCLE CONTAINER
+   ═══════════════════════════════════════════ */
+.lifecycle-container { display: flex; flex-direction: column; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; margin: 2em 0; overflow: hidden; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24); }
+@media (min-width: 992px) { .lifecycle-container { flex-direction: row; height: 500px; } }
+.lc-flow-panel { flex: 1.3; padding: 24px; overflow: auto; display: flex; flex-direction: column; border-bottom: 1px solid var(--border); }
+@media (min-width: 992px) { .lc-flow-panel { border-bottom: none; border-right: 1px solid var(--border); } }
+.lifecycle-title { font-size: 11px; letter-spacing: .15em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 24px; font-weight: 700; border-bottom: 1px dashed var(--border); padding-bottom: 12px; }
+.lc-flow-scroll { flex: 1; display: flex; align-items: center; overflow-x: auto; padding: 20px 0; }
+.lc-flow { display: flex; align-items: center; gap: 0; min-width: max-content; margin: auto; }
+.lc-step { display: flex; flex-direction: column; align-items: center; position: relative; }
+.lc-node { border-radius: 8px; padding: 14px 18px; min-width: 140px; max-width: 180px; text-align: center; border: 1px solid; position: relative; transition: all .25s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; user-select: none; }
+.lc-node:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+.lc-node.active { transform: scale(1.05); border-width: 2px; }
+.lc-node.ctrl { background: var(--node-ctrl); border-color: var(--node-ctrl-b); }
+.lc-node.svc { background: var(--node-svc); border-color: var(--node-svc-b); }
+.lc-node.db { background: var(--node-db); border-color: var(--node-db-b); }
+.lc-node.client { background: var(--bg-surface2); border-color: var(--border); }
+.lc-node-label { font-size: 12px; font-weight: 600; color: var(--text-bright); margin-bottom: 4px; }
+.lc-node-code { font-size: 10.5px; font-family: monospace; color: var(--text-muted); margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lc-node-desc { font-size: 10px; color: var(--text-muted); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.lc-connector { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 4px; }
+.lc-line { height: 2px; width: 40px; background: linear-gradient(90deg, var(--border), var(--accent)); position: relative; overflow: hidden; }
+.lc-line::after { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(0,122,204,.8), transparent); animation: flow 2s infinite; }
+.lc-arrow { width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 6px solid var(--accent); margin-left: -1px; }
+
+.lc-detail-panel { flex: 1; background: var(--bg-sidebar); padding: 24px; display: flex; flex-direction: column; overflow: auto; }
+.lc-detail-empty { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text-muted); text-align: center; font-style: italic; font-size: 13px; }
+.lc-detail-header { margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+.lc-detail-type { font-size: 10px; text-transform: uppercase; color: var(--accent); font-weight: 700; margin-bottom: 4px; }
+.lc-detail-title { font-size: 16px; font-weight: 600; color: var(--text-bright); }
+.lc-detail-file { font-size: 11px; font-family: monospace; color: var(--text-muted); margin-top: 4px; }
+.lc-flow-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+.lc-flow-card-title { font-size: 10px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; }
+.lc-flow-card-code { font-family: monospace; font-size: 12px; color: var(--text-bright); margin-bottom: 4px; }
+.lc-flow-card-desc { font-size: 11.5px; color: var(--text); line-height: 1.5; }
+
   </style>
 </head>
 <body>
-  <div class="page-wrap">
-    <nav class="sidebar" id="sidebar"></nav>
-    <main class="content">
-      <h1>Giải Thích Chuyên Sâu - Tương Tác Giữa Controller và Service Trong Module User</h1>
-      <p>Tài liệu này cung cấp một cái nhìn cực kỳ chi tiết (deep dive) vào cách hoạt động của <code>UserController</code> và <code>UserService</code> trong hệ thống NestJS của chúng ta. Trọng tâm là phân tích luồng dữ liệu (data flow) từ mạng (network) vào controller, cách controller giao tiếp with service, cách service thao tác with database (thông qua Prisma) & cache (Redis), và kết quả cuối cùng được trả về cho client.</p>
+<div class="page-wrap">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="content">
+    <h1>Giải Thích Chuyên Sâu - Module User</h1>
+    <p>Tài liệu này phân tích chi tiết cách hoạt động của <code>UserController</code> và <code>UserService</code>, trọng tâm là luồng dữ liệu từ network vào DB & Cache.</p>
 
-      <!-- Tóm tắt trực quan -->
-      <table style="width:100%; margin: 2em 0; border-collapse: collapse; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden;">
-        <thead>
-          <tr style="background: var(--bg-surface2);">
-            <th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--border);">Thành phần</th>
-            <th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--border);">Sơ đồ trực quan</th>
-            <th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--border);">Hành động</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td style="padding: 12px; border-bottom: 1px solid var(--border);"><strong>1. Tầng Controller</strong></td>
-            <td style="padding: 12px; border-bottom: 1px solid var(--border);">
-              <div style="display:flex; align-items:center; gap:8px;">
-                <div style="padding:4px 8px; background:var(--accent); border-radius:4px; color:white; font-size:10px;">HTTP Request</div>
-                <span style="color:var(--text-muted);">➔</span>
-                <div style="padding:4px 8px; background:var(--yellow); color:var(--bg); border-radius:4px; font-size:10px; font-weight:bold;">UserController</div>
-              </div>
-            </td>
-            <td style="padding: 12px; border-bottom: 1px solid var(--border);">
-              <a href="#heading-1" style="padding: 6px 12px; background: var(--accent); color: white; border-radius: 4px; text-decoration: none; font-size: 12px;">Tới phần chi tiết 👇</a>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 12px; border-bottom: 1px solid var(--border);"><strong>2. Tầng Service</strong></td>
-            <td style="padding: 12px; border-bottom: 1px solid var(--border);">
-              <div style="display:flex; align-items:center; gap:8px;">
-                <div style="padding:4px 8px; background:var(--yellow); color:var(--bg); border-radius:4px; font-size:10px; font-weight:bold;">Ctrl</div>
-                <span style="color:var(--text-muted);">➔</span>
-                <div style="padding:4px 8px; background:var(--purple); border-radius:4px; color:white; font-size:10px;">UserService</div>
-                <span style="color:var(--text-muted);">➔</span>
-                <div style="padding:4px 8px; background:var(--kw); border-radius:4px; color:white; font-size:10px;">Prisma</div>
-              </div>
-            </td>
-            <td style="padding: 12px; border-bottom: 1px solid var(--border);">
-              <a href="#heading-2" style="padding: 6px 12px; background: var(--accent); color: white; border-radius: 4px; text-decoration: none; font-size: 12px;">Tới phần chi tiết 👇</a>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 12px;"><strong>3. Luồng Kết Quả</strong></td>
-            <td style="padding: 12px;">
-              <div style="display:flex; align-items:center; gap:8px;">
-                <div style="padding:4px 8px; background:var(--green); border-radius:4px; color:white; font-size:10px;">DB Result</div>
-                <span style="color:var(--text-muted);">➔</span>
-                <div style="padding:4px 8px; background:var(--accent); border-radius:4px; color:white; font-size:10px;">JSON Response</div>
-              </div>
-            </td>
-            <td style="padding: 12px;">
-              <a href="#heading-3" style="padding: 6px 12px; background: var(--accent); color: white; border-radius: 4px; text-decoration: none; font-size: 12px;">Tới phần chi tiết 👇</a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- SUMMARY TABLE -->
+    <h2 id="summary">Tóm tắt nội dung</h2>
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>Mục</th>
+          <th>Sơ đồ minh họa</th>
+          <th>Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>1. Tầng Giao Diện Mạng</strong></td>
+          <td><div class="lc-node ctrl">Controller</div></td>
+          <td><a href="#1-tang-giao-dien-mang-controllers-usercontroller">Xem chi tiết</a></td>
+        </tr>
+        <tr>
+          <td><strong>2. Tầng Logic Nghiệp Vụ</strong></td>
+          <td><div class="lc-node svc">Service</div></td>
+          <td><a href="#2-tang-logic-nghiep-vu-services-userservice">Xem chi tiết</a></td>
+        </tr>
+        <tr>
+          <td><strong>3. Luồng Kết Quả</strong></td>
+          <td><div class="lc-node client">Raw Flow</div></td>
+          <td><a href="#3-luong-ket-qua-outputs-returns-flow">Xem chi tiết</a></td>
+        </tr>
+        <tr>
+          <td><strong>4. Phụ Thuộc Khéo Léo</strong></td>
+          <td><div class="lc-node guard">Auth Interact</div></td>
+          <td><a href="#4-phu-thuoc-kheo-leo-dependencies-va-tuong-tac-voi-module-auth">Xem chi tiết</a></td>
+        </tr>
+      </tbody>
+    </table>
 
-      <h2>1. Tầng Giao Diện Mạng (Controllers): <code>UserController</code></h2>
-      <p><code>UserController</code> (<code>src/user/user.controller.ts</code>) là điểm chặn (entry point) đầu tiên cho mọi HTTP request liên quan đến User.</p>
-      
-      <h3>Các Endpoints và Decorators Cốt Lõi:</h3>
-      <ul>
-        <li><strong>@Post()</strong>: Tạo mới người dùng</li>
-        <li><strong>@Get()</strong>: Truy vấn danh sách</li>
-        <li><strong>@Get(':id')</strong>: Lấy thông tin chi tiết</li>
-        <li><strong>@Patch(':id')</strong>: Cập nhật</li>
-        <li><strong>@Delete(':id')</strong>: Xóa</li>
-      </ul>
+    <h2 id="1-tang-giao-dien-mang-controllers-usercontroller">1. Tầng Giao Diện Mạng (Controllers): <code>UserController</code></h2>
+    <p>Điểm chặn (entry point) đầu tiên cho mọi HTTP request liên quan đến User.</p>
+    
+    <div class="dec-card">
+      <div class="dec-card-name">@Controller('users')</div>
+      <div class="dec-card-body">
+        <div class="dec-card-desc">Gắn tiền tố <code>/users</code> cho toàn bộ các route bên trong class.</div>
+      </div>
+    </div>
 
-      <h2>2. Tầng Logic Nghiệp Vụ (Services): <code>UserService</code></h2>
-      <p><code>UserService</code> (<code>src/user/user.service.ts</code>) được định nghĩa với decorator <code>@Injectable()</code>.</p>
-      
-      <h2>3. Luồng Kết Quả / Outputs</h2>
-      <p>Trong kiến trúc của chúng ta, luồng dữ liệu diễn ra một cách trực tiếp, không qua các lớp DTO trung gian tại thời điểm phản hồi.</p>
-    </main>
-  </div>
-  <script>
-    // Các hàm khởi tạo TOC, tabs, lifecycle (được lược bỏ cho gọn)
-    function buildTOC() {
-      const toc = document.getElementById('sidebar');
-      const headings = document.querySelectorAll('h1, h2, h3');
-      const tocTitle = document.createElement('div');
-      tocTitle.className = 'sidebar-title';
-      tocTitle.innerText = 'Mục lục';
-      toc.appendChild(tocTitle);
-      
-      headings.forEach((h, i) => {
-        h.id = 'heading-' + i;
-        const link = document.createElement('a');
-        link.className = 'toc-item toc-' + h.tagName.toLowerCase();
-        link.href = '#heading-' + i;
-        link.innerText = h.innerText;
-        toc.appendChild(link);
-      });
-    }
-    document.addEventListener('DOMContentLoaded', buildTOC);
-  </script>
+    <div class="module-panel">
+      <div class="module-panel-header">
+        <span class="module-panel-icon">👤</span>
+        <span class="module-panel-name">User Controller</span>
+        <span class="module-panel-path">src/user/user.controller.ts</span>
+      </div>
+      <div class="file-pane active">
+        <div class="crud-card">
+          <div class="crud-header">
+            <span class="crud-method method-post">POST</span>
+            <span class="crud-path">/users</span>
+            <span class="crud-fn">create()</span>
+          </div>
+          <div class="crud-body">
+            <div><div class="crud-col-title">Input</div><div class="crud-col-content"><code>@Body() data: Prisma.UserCreateInput</code></div></div>
+            <div><div class="crud-col-title">Xử lý</div><div class="crud-col-content">Gọi <code>userService.create(data)</code></div></div>
+            <div><div class="crud-col-title">Output</div><div class="crud-col-content">User object mới</div></div>
+          </div>
+        </div>
+
+        <div class="crud-card">
+          <div class="crud-header">
+            <span class="crud-method method-get">GET</span>
+            <span class="crud-path">/users/:id</span>
+            <span class="crud-fn">findById()</span>
+          </div>
+          <div class="crud-body">
+            <div><div class="crud-col-title">Input</div><div class="crud-col-content"><code>@Param('id', ParseIntPipe)</code></div></div>
+            <div><div class="crud-col-title">Xử lý</div><div class="crud-col-content">Ép kiểu sang number, gọi <code>findById(id)</code></div></div>
+            <div><div class="crud-col-title">Output</div><div class="crud-col-content">User details hoặc 400 (nếu id sai định dạng)</div></div>
+          </div>
+        </div>
+        
+        <p><em>Và các endpoint khác: GET (list), PATCH (update), DELETE.</em></p>
+      </div>
+    </div>
+
+    <h2 id="2-tang-logic-nghiep-vu-services-userservice">2. Tầng Logic Nghiệp Vụ (Services): <code>UserService</code></h2>
+    <div class="dec-card">
+      <div class="dec-card-name">@Injectable()</div>
+      <div class="dec-card-body">
+        <div class="dec-card-desc">Đăng ký class vào DI container, cho phép inject PrismaService và RedisService.</div>
+      </div>
+    </div>
+
+    <div class="module-panel">
+      <div class="module-panel-header">
+        <span class="module-panel-icon">⚙️</span>
+        <span class="module-panel-name">User Service</span>
+        <span class="module-panel-path">src/user/user.service.ts</span>
+      </div>
+      <div class="file-pane active">
+        <h3>Phân Tích Các Hàm</h3>
+        <ul>
+          <li><strong><code>create</code></strong>: Ghi DB + <code>redisService.del('all_users')</code> (Cache Invalidation).</li>
+          <li><strong><code>findByEmail/findById</code></strong>: Sử dụng <code>findUnique</code> để đạt độ phức tạp $O(1)$.</li>
+          <li><strong><code>getAllUsers</code></strong>: Sử dụng <code>redisService.getOrSet</code> và <code>select</code> để bảo mật password hash.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2 id="3-luong-ket-qua-outputs-returns-flow">3. Luồng Kết Quả / Outputs (Returns Flow)</h2>
+    <p>Trong kiến trúc này, dữ liệu thô (raw Prisma models) chảy trực tiếp từ DB ra Client.</p>
+    
+    <div class="lifecycle-container">
+      <div class="lc-flow-panel">
+        <div class="lifecycle-title">Flow — Raw Data Transmission</div>
+        <div class="lc-flow-scroll">
+          <div class="lc-flow">
+            <div class="lc-step">
+              <div class="lc-node db active" data-node-name="Prisma DB" data-node-type="Source" data-node-file="PostgreSQL" data-flow-in="Query" data-why-in="Yêu cầu từ Service." data-flow-out="Raw Object" data-why-out="Trả về object chứa cả password hash.">
+                <div class="lc-node-label">Database</div>
+                <div class="lc-node-code">Raw Entity</div>
+              </div>
+              <div class="lc-step-num">①</div>
+            </div>
+            <div class="lc-connector"><div class="lc-line"></div><div class="lc-arrow"></div></div>
+            <div class="lc-step">
+              <div class="lc-node svc" data-node-name="UserService" data-node-type="Logic" data-node-file="user.service.ts" data-flow-in="Raw Entity" data-why-in="Nhận dữ liệu từ DB." data-flow-out="Return raw" data-why-out="Chuyển tiếp nguyên bản về Controller.">
+                <div class="lc-node-label">Service</div>
+                <div class="lc-node-code">Pass-through</div>
+              </div>
+              <div class="lc-step-num">②</div>
+            </div>
+            <div class="lc-connector"><div class="lc-line"></div><div class="lc-arrow"></div></div>
+            <div class="lc-step">
+              <div class="lc-node ctrl" data-node-name="UserController" data-node-type="Network" data-node-file="user.controller.ts" data-flow-in="Raw Entity" data-why-in="Nhận từ Service." data-flow-out="JSON.stringify" data-why-out="NestJS ngầm định serialize thành JSON.">
+                <div class="lc-node-label">Controller</div>
+                <div class="lc-node-code">HTTP Response</div>
+              </div>
+              <div class="lc-step-num">③</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="lc-detail-panel">
+        <div class="lc-detail-empty">Click vào node để xem luồng dữ liệu thô.</div>
+        <div class="lc-detail-body" style="display: none;">
+          <div class="lc-detail-header">
+            <div class="lc-detail-type"></div><div class="lc-detail-title"></div><div class="lc-detail-file"></div>
+          </div>
+          <div class="lc-flow-card"><div class="lc-flow-card-title">📥 Dữ liệu vào</div><div class="lc-flow-card-code"></div><div class="lc-flow-card-desc"></div></div>
+          <div class="lc-flow-card"><div class="lc-flow-card-title">📤 Dữ liệu ra</div><div class="lc-flow-card-code"></div><div class="lc-flow-card-desc"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <h2 id="4-phu-thuoc-kheo-leo-dependencies-va-tuong-tac-voi-module-auth">4. Phụ Thuộc Khéo Léo (Dependencies) và Tương Tác với Module Auth</h2>
+    <p><code>UserService</code> được <code>AuthService</code> inject để gọi <code>findByEmail</code> đối chiếu mật khẩu.</p>
+    
+    <div class="dec-card">
+      <div class="dec-card-name">@Inject(forwardRef(() => AuthModule))</div>
+      <div class="dec-card-body">
+        <div class="dec-card-desc">Giải quyết <strong>Circular Dependency</strong> (Phụ thuộc vòng).</div>
+        <div class="dec-card-effect">
+          <b>Cơ chế:</b> Hoãn việc tham chiếu cho đến khi cả hai module được khởi tạo xong trên bộ nhớ.
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+function buildTOC() {
+  const sidebar = document.getElementById('sidebar');
+  const headings = document.querySelectorAll('h1, h2, h3');
+  const title = document.createElement('div');
+  title.className = 'sidebar-title'; title.innerText = 'Nội dung'; sidebar.appendChild(title);
+  headings.forEach(h => {
+    const id = h.id || h.innerText.toLowerCase().replace(/\s+/g, '-');
+    h.id = id;
+    const a = document.createElement('a'); a.href = '#' + id; a.innerText = h.innerText; a.className = 'toc-item toc-' + h.tagName.toLowerCase();
+    sidebar.appendChild(a);
+  });
+}
+function initLifecycle() {
+  document.querySelectorAll('.lc-node').forEach(node => {
+    node.addEventListener('click', () => {
+      document.querySelectorAll('.lc-node').forEach(n => n.classList.remove('active'));
+      node.classList.add('active');
+      const panel = document.querySelector('.lc-detail-body');
+      panel.style.display = 'block'; document.querySelector('.lc-detail-empty').style.display = 'none';
+      panel.querySelector('.lc-detail-title').innerText = node.dataset.nodeName;
+      panel.querySelector('.lc-detail-type').innerText = node.dataset.nodeType;
+      panel.querySelector('.lc-detail-file').innerText = node.dataset.nodeFile;
+      panel.querySelectorAll('.lc-flow-card-code')[0].innerText = node.dataset.flowIn;
+      panel.querySelectorAll('.lc-flow-card-desc')[0].innerText = node.dataset.whyIn;
+      panel.querySelectorAll('.lc-flow-card-code')[1].innerText = node.dataset.flowOut;
+      panel.querySelectorAll('.lc-flow-card-desc')[1].innerText = node.dataset.whyOut;
+    });
+  });
+}
+document.addEventListener('DOMContentLoaded', () => { buildTOC(); initLifecycle(); });
+</script>
 </body>
 </html>

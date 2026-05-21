@@ -5,122 +5,179 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Phân Tích Chuyên Sâu Module Auth</title>
   <style>
-    /* === PASTE FULL CSS BLOCK BÊN DƯỚI === */
-    :root {
-      --bg:            #1e1e1e;
-      --bg-sidebar:    #252526;
-      --bg-surface:    #2d2d30;
-      --bg-surface2:   #3c3c3c;
-      --bg-hover:      #2a2d2e;
-      --bg-active:     #37373d;
-      --border:        #404040;
-      --border-light:  #3c3c3c;
-      --text:          #d4d4d4;
-      --text-muted:    #858585;
-      --text-bright:   #ffffff;
-      --text-dim:      #6a6a6a;
-      --kw:   #569cd6;
-      --fn:   #dcdcaa;
-      --str:  #ce9178;
-      --typ:  #4ec9b0;
-      --cmt:  #6a9955;
-      --num:  #b5cea8;
-      --dec:  #c586c0;
-      --prop: #9cdcfe;
-      --op:   #d4d4d4;
-      --accent:  #007acc;
-      --green:   #4ec9b0;
-      --yellow:  #dcdcaa;
-      --orange:  #ce9178;
-      --red:     #f44747;
-      --purple:  #c586c0;
-      --node-guard:       #1a3a52;
-      --node-guard-b:     #007acc;
-      --node-pipe:        #1a3a28;
-      --node-pipe-b:      #4ec9b0;
-      --node-ctrl:        #2d2516;
-      --node-ctrl-b:      #dcdcaa;
-      --node-svc:         #2d1e35;
-      --node-svc-b:       #c586c0;
-      --node-db:          #1a2535;
-      --node-db-b:        #569cd6;
-      --node-cache:       #1a2a1a;
-      --node-cache-b:     #4ec9b0;
-      --node-err:         #3a1a1a;
-      --node-err-b:       #f44747;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.7; }
-    .page-wrap { display: flex; min-height: 100vh; }
-    .sidebar { width: 260px; flex-shrink: 0; background: var(--bg-sidebar); border-right: 1px solid var(--border); position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 16px 0; }
-    .content { flex: 1; max-width: 960px; padding: 48px 52px 100px; }
-    h1, h2, h3 { color: var(--text-bright); margin: 1.5em 0 0.5em; }
-    h1 { font-size: 2em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
-    h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: 0.2em; }
-    pre { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin: 1em 0; overflow-x: auto; }
-    code { font-family: 'Consolas', monospace; color: var(--prop); background: var(--bg-surface); padding: 0.2em 0.4em; border-radius: 4px; }
-    
-    /* Dec Card */
-    .dec-card { background: var(--bg-surface2); border: 1px solid var(--border); border-left: 4px solid var(--dec); padding: 12px 16px; margin: 1em 0; border-radius: 6px; font-size: 13px; }
-    .dec-card-name { font-family: monospace; color: var(--dec); font-weight: 600; margin-bottom: 4px; }
-    
-    /* CRUD Card */
-    .crud-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; margin: 1em 0; overflow: hidden; }
-    .crud-header { background: var(--bg-surface2); padding: 10px 16px; border-bottom: 1px solid var(--border); font-weight: bold; }
-    .crud-body { padding: 16px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
-    
-    /* Lifecycle Container */
-    .lifecycle-container { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 2em 0; overflow-x: auto; }
-    .lc-flow { display: flex; align-items: center; gap: 10px; padding: 20px 0; }
-    .lc-node { background: var(--bg-surface2); border: 1px solid var(--border); padding: 14px 18px; border-radius: 8px; text-align: center; min-width: 140px; cursor: pointer; transition: 0.2s; }
-    .lc-node:hover { transform: translateY(-2px); border-color: var(--accent); }
-    .lc-node-label { font-weight: bold; color: var(--text-bright); margin-bottom: 4px; }
-    .lc-node-code { font-family: monospace; font-size: 11px; color: var(--text-muted); }
+:root {
+  --bg: #1e1e1e; --bg-sidebar: #252526; --bg-surface: #2d2d30; --bg-surface2: #3c3c3c;
+  --bg-hover: #2a2d2e; --bg-active: #37373d; --border: #404040; --text: #d4d4d4;
+  --text-muted: #858585; --text-bright: #ffffff; --kw: #569cd6; --fn: #dcdcaa;
+  --str: #ce9178; --typ: #4ec9b0; --cmt: #6a9955; --num: #b5cea8; --dec: #c586c0;
+  --prop: #9cdcfe; --accent: #007acc; --green: #4ec9b0; --yellow: #dcdcaa;
+  --orange: #ce9178; --red: #f44747; --purple: #c586c0;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; font-size: 14px; line-height: 1.7; }
+.page-wrap { display: flex; min-height: 100vh; }
+.sidebar { width: 260px; flex-shrink: 0; background: var(--bg-sidebar); border-right: 1px solid var(--border); position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 16px 0; }
+.content { flex: 1; max-width: 1000px; padding: 48px 52px 100px; }
+h1, h2, h3 { color: var(--text-bright); margin: 2em 0 0.6em; scroll-margin-top: 20px; }
+h1 { font-size: 2em; border-bottom: 1px solid var(--border); padding-bottom: 0.4em; }
+h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
+h3 { color: var(--yellow); }
+p { margin: 0.8em 0; }
+code { font-family: monospace; background: var(--bg-surface); padding: 0.2em 0.4em; border-radius: 4px; color: var(--prop); border: 1px solid var(--border); }
+
+/* Components */
+.dec-card { border-left: 4px solid var(--dec); background: var(--bg-surface2); padding: 16px; border-radius: 6px; margin: 1em 0; display: flex; gap: 16px; }
+.dec-card-name { font-family: monospace; color: var(--dec); font-weight: bold; min-width: 200px; }
+.crud-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; margin: 1.5em 0; overflow: hidden; }
+.crud-header { background: var(--bg-surface2); padding: 12px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+.crud-method { font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 4px; font-family: monospace; }
+.method-post { background: #1a2d0d; color: #89d185; }
+.method-get { background: #1a3a28; color: #4ec9b0; }
+.crud-body { padding: 16px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; font-size: 13px; }
+
+.lifecycle-container { display: flex; flex-direction: column; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; margin: 2em 0; overflow: hidden; }
+@media (min-width: 992px) { .lifecycle-container { flex-direction: row; height: 520px; } }
+.lc-flow-panel { flex: 1.3; padding: 24px; overflow: auto; border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+.lc-detail-panel { flex: 0.7; padding: 24px; background: var(--bg-sidebar); }
+.lc-flow-scroll { flex: 1; display: flex; align-items: center; overflow-x: auto; padding: 20px 0; }
+.lc-flow { display: flex; align-items: center; gap: 0; min-width: max-content; }
+.lc-node { border-radius: 8px; padding: 14px; min-width: 140px; text-align: center; border: 1px solid; cursor: pointer; transition: 0.2s; }
+.lc-node.active { border-width: 2px; border-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
+
+.summary-table { width: 100%; border-collapse: collapse; margin: 2em 0; }
+.summary-table th, .summary-table td { border: 1px solid var(--border); padding: 12px; text-align: left; }
+.summary-table th { background: var(--bg-surface2); }
+
+.toc-item { display: block; padding: 5px 16px; font-size: 12.5px; color: var(--text-muted); text-decoration: none; }
+.toc-item:hover { background: var(--bg-hover); color: var(--text); }
   </style>
 </head>
 <body>
   <div class="page-wrap">
-    <nav class="sidebar">
-      <div class="sidebar-title">Mục Lục</div>
-      <a href="#1-controller" class="toc-item">1. Controller</a>
-      <a href="#2-service" class="toc-item">2. Service</a>
-      <a href="#3-trace" class="toc-item">3. Dữ liệu trả về</a>
-      <a href="#4-lib" class="toc-item">4. Thư viện</a>
-    </nav>
+    <nav class="sidebar" id="sidebar"></nav>
     <main class="content">
-      <h1>Phân Tích Module Auth</h1>
+      <h1>Phân Tích Chuyên Sâu Module Auth (src/auth)</h1>
+      <p>Tài liệu này cung cấp một cái nhìn chuyên sâu vào cách thức hoạt động của module Xác thực (Auth). Trọng tâm là sự tương tác giữa Controller và Service, dòng chảy dữ liệu và vai trò của các thư viện bên thứ ba.</p>
 
-      <h2 id="1-controller">1. Controller</h2>
+      <h2>Tóm tắt các thành phần</h2>
+      <table class="summary-table">
+        <thead>
+          <tr><th>Thành phần</th><th>Mô tả</th><th>Liên kết</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Controller</strong></td><td>Tiếp nhận request, xử lý Serialization và Cookies.</td><td><a href="#1-controller">Chi tiết</a></td></tr>
+          <tr><td><strong>Service</strong></td><td>Logic nghiệp vụ chính: bcrypt, JWT, và quản lý phiên.</td><td><a href="#2-service">Chi tiết</a></td></tr>
+          <tr><td><strong>Data Trace</strong></td><td>Luồng truyền tải Token và làm sạch dữ liệu DTO.</td><td><a href="#3-trace">Chi tiết</a></td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="1-controller">1. Controller (src/auth/auth.controller.ts)</h2>
+      <p><code>AuthController</code> là cửa ngõ giao tiếp, tiếp nhận yêu cầu HTTP và áp dụng các lớp bảo vệ thông qua Decorators.</p>
+
+      <h3>1.1. Giải Mã Các Decorators Trọng Yếu</h3>
+      <div class="dec-card">
+        <div class="dec-card-name">@UseInterceptors(ClassSerializerInterceptor)</div>
+        <div class="dec-card-body">Tự động hóa quá trình "làm sạch" dữ liệu nhạy cảm (như password) trước khi gửi về client.</div>
+      </div>
+      <div class="dec-card">
+        <div class="dec-card-name">@Res({ passthrough: true })</div>
+        <div class="dec-card-body">Cho phép thiết lập Header/Cookie mà không làm gián đoạn quy trình xử lý <code>return</code> của NestJS.</div>
+      </div>
       <div class="dec-card">
         <div class="dec-card-name">@UseGuards(AuthGuard)</div>
-        <div class="dec-card-body">Bảo vệ endpoint, đảm bảo chỉ người dùng đã xác thực mới truy cập được.</div>
+        <div class="dec-card-body">Bảo vệ endpoint, trích xuất và verify JWT từ cookies để gắn vào <code>request.user</code>.</div>
       </div>
 
-      <h2 id="2-service">2. Service</h2>
-      <div class="crud-card">
-        <div class="crud-header">POST /auth/login</div>
-        <div class="crud-body">
-          <div><strong>Input:</strong> LoginDto</div>
-          <div><strong>Process:</strong> bcrypt.compare</div>
-          <div><strong>Output:</strong> JWT Tokens</div>
-        </div>
+      <h2 id="2-service">2. Service (src/auth/auth.service.ts)</h2>
+      <p><code>AuthService</code> chứa logic cốt lõi: băm mật khẩu, sinh token và thiết lập cookies.</p>
+      
+      <h3>2.1. Các Phương Thức Public</h3>
+      <ul>
+        <li><strong>register</strong>: Kiểm tra email, băm mật khẩu qua bcrypt, lưu user mới.</li>
+        <li><strong>login</strong>: So khớp password, sinh cặp Access/Refresh Token, thiết lập Cookies.</li>
+        <li><strong>handleRefresh</strong>: Kiểm tra Refresh Token trong DB (chống Token Hijacking), cấp mới cặp token.</li>
+        <li><strong>handleLogout</strong>: Vô hiệu hóa token trong DB và xóa Cookies trình duyệt.</li>
+      </ul>
+
+      <h3>2.2. Các Phương Thức Private</h3>
+      <div class="dec-card">
+        <div class="dec-card-name">setCookies()</div>
+        <div class="dec-card-body">Cấu hình bảo mật Cookie: <code>httpOnly</code>, <code>secure</code>, <code>sameSite</code>.</div>
+      </div>
+      <div class="dec-card">
+        <div class="dec-card-name">generateTokens()</div>
+        <div class="dec-card-body">Sử dụng <code>jsonwebtoken</code> để ký mã với Secret Key và TTL tương ứng.</div>
       </div>
 
-      <h2 id="3-trace">3. Theo Dấu Dữ Liệu</h2>
+      <h2 id="3-trace">3. Theo Dấu Dữ Liệu Trả Về (Returns & Outputs Trace)</h2>
+      <p>Luồng truyền tải Token và bảo mật XSS qua HttpOnly Cookies.</p>
+
       <div class="lifecycle-container">
-        <div class="lc-flow">
-          <div class="lc-node"><div class="lc-node-label">Client</div><div class="lc-node-code">Request</div></div>
-          <div class="lc-node"><div class="lc-node-label">AuthGuard</div><div class="lc-node-code">canActivate()</div></div>
-          <div class="lc-node"><div class="lc-node-label">Controller</div><div class="lc-node-code">login()</div></div>
-          <div class="lc-node"><div class="lc-node-label">Service</div><div class="lc-node-code">auth()</div></div>
+        <div class="lc-flow-panel">
+          <div class="lifecycle-title">Request Lifecycle - Login Flow</div>
+          <div class="lc-flow-scroll">
+            <div class="lc-flow">
+              <div class="lc-node" data-node-name="Client" data-flow-in="Credentials" data-flow-out="POST /auth/login">
+                <div class="lc-node-label">Client</div>
+                <div class="lc-node-code">Browser</div>
+              </div>
+              <div class="lc-node" data-node-name="AuthService" data-flow-in="LoginDto" data-flow-out="AuthResponseDto">
+                <div class="lc-node-label">AuthService</div>
+                <div class="lc-node-code">bcrypt + JWT</div>
+              </div>
+              <div class="lc-node" data-node-name="Interceptor" data-flow-in="Raw User" data-flow-out="Clean JSON">
+                <div class="lc-node-label">Serializer</div>
+                <div class="lc-node-code">@Exclude()</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="lc-detail-panel" id="lc-detail">
+          <div class="lc-detail-empty">Click node để xem chi tiết...</div>
+          <div class="lc-detail-body" style="display:none;">
+            <h4 id="detail-name"></h4>
+            <p><strong>IN:</strong> <span id="detail-in"></span></p>
+            <p><strong>OUT:</strong> <span id="detail-out"></span></p>
+          </div>
         </div>
       </div>
+
+      <h2 id="4-lib">4. Vai Trò Cốt Lõi Của Các Thư Viện</h2>
+      <ul>
+        <li><strong>bcryptjs</strong>: Mã hóa mật khẩu một chiều với salt rounds = 10 (cân bằng bảo mật/hiệu suất).</li>
+        <li><strong>jsonwebtoken</strong>: Cơ chế Stateless Session với Access Token (15m) và Refresh Token (7d).</li>
+        <li><strong>class-transformer</strong>: Lá chắn bảo mật cuối cùng giúp ngăn chặn rò rỉ dữ liệu nhạy cảm.</li>
+      </ul>
     </main>
   </div>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log('Component lifecycle initialized');
-    });
+    function buildTOC() {
+      const sidebar = document.getElementById('sidebar');
+      const headings = document.querySelectorAll('h1, h2, h3');
+      headings.forEach(h => {
+        if (!h.id) h.id = h.innerText.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        const item = document.createElement('a');
+        item.className = 'toc-item';
+        item.href = '#' + h.id;
+        item.innerText = h.innerText;
+        sidebar.appendChild(item);
+      });
+    }
+    function initLifecycle() {
+      document.querySelectorAll('.lc-node').forEach(node => {
+        node.addEventListener('click', () => {
+          document.querySelectorAll('.lc-node').forEach(n => n.classList.remove('active'));
+          node.classList.add('active');
+          const panel = document.getElementById('lc-detail');
+          panel.querySelector('.lc-detail-empty').style.display = 'none';
+          panel.querySelector('.lc-detail-body').style.display = 'block';
+          document.getElementById('detail-name').innerText = node.dataset.nodeName;
+          document.getElementById('detail-in').innerText = node.dataset.flowIn;
+          document.getElementById('detail-out').innerText = node.dataset.flowOut;
+        });
+      });
+    }
+    document.addEventListener('DOMContentLoaded', () => { buildTOC(); initLifecycle(); });
   </script>
 </body>
 </html>

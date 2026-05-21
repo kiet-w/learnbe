@@ -3,91 +3,201 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Giải Thích Chuyên Sâu - Module Cart</title>
+  <title>Giải Thích Chuyên Sâu - Module Cart (src/cart)</title>
   <style>
-/* === VSCode Dark Theme - NestJS Doc Renderer === */
 :root {
   --bg: #1e1e1e; --bg-sidebar: #252526; --bg-surface: #2d2d30; --bg-surface2: #3c3c3c;
-  --bg-hover: #2a2d2e; --bg-active: #37373d; --border: #404040; --border-light: #3c3c3c;
-  --text: #d4d4d4; --text-muted: #858585; --text-bright: #ffffff; --text-dim: #6a6a6a;
-  --kw: #569cd6; --fn: #dcdcaa; --str: #ce9178; --typ: #4ec9b0; --cmt: #6a9955;
-  --num: #b5cea8; --dec: #c586c0; --prop: #9cdcfe; --accent: #007acc; --green: #4ec9b0;
-  --yellow: #dcdcaa; --orange: #ce9178; --red: #f44747; --purple: #c586c0;
-  --node-guard: #1a3a52; --node-guard-b: #007acc; --node-pipe: #1a3a28; --node-pipe-b: #4ec9b0;
-  --node-ctrl: #2d2516; --node-ctrl-b: #dcdcaa; --node-svc: #2d1e35; --node-svc-b: #c586c0;
-  --node-db: #1a2535; --node-db-b: #569cd6; --node-cache: #1a2a1a; --node-cache-b: #4ec9b0;
-  --node-err: #3a1a1a; --node-err-b: #f44747;
+  --bg-hover: #2a2d2e; --bg-active: #37373d; --border: #404040; --text: #d4d4d4;
+  --text-muted: #858585; --text-bright: #ffffff; --kw: #569cd6; --fn: #dcdcaa;
+  --str: #ce9178; --typ: #4ec9b0; --cmt: #6a9955; --num: #b5cea8; --dec: #c586c0;
+  --prop: #9cdcfe; --accent: #007acc; --green: #4ec9b0; --yellow: #dcdcaa;
+  --orange: #ce9178; --red: #f44747; --purple: #c586c0;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.7; }
+body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; font-size: 14px; line-height: 1.7; }
 .page-wrap { display: flex; min-height: 100vh; }
 .sidebar { width: 260px; flex-shrink: 0; background: var(--bg-sidebar); border-right: 1px solid var(--border); position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 16px 0; }
-.content { flex: 1; max-width: 960px; padding: 48px 52px 100px; }
-h1, h2, h3 { color: var(--text-bright); margin: 2em 0 0.6em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
-h1 { font-size: 1.9em; } h2 { font-size: 1.45em; } h3 { font-size: 1.2em; color: var(--yellow); }
-code { font-family: monospace; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 4px; padding: .15em .45em; color: var(--prop); }
-pre { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; margin: 1.2em 0; overflow: hidden; }
-pre code { display: block; padding: 18px 20px; color: var(--text); overflow-x: auto; }
-.pre-header { background: var(--bg-surface2); padding: 6px 14px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 11px; }
-.pre-filename { color: var(--yellow); font-family: monospace; }
-/* Lifecycle Container Component Styles */
-.lifecycle-container { display: flex; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; margin: 2em 0; overflow: hidden; }
-.lc-flow-panel { flex: 1; padding: 24px; border-right: 1px solid var(--border); }
-.lifecycle-title { font-size: 11px; letter-spacing: .15em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 24px; font-weight: 700; }
-.lc-node { border-radius: 8px; padding: 14px; border: 1px solid; text-align: center; }
-.lc-node.guard { background: var(--node-guard); border-color: var(--node-guard-b); }
-.lc-node.ctrl { background: var(--node-ctrl); border-color: var(--node-ctrl-b); }
-.lc-node.svc { background: var(--node-svc); border-color: var(--node-svc-b); }
-.lc-node-label { font-size: 12px; font-weight: 600; color: var(--text-bright); }
+.content { flex: 1; max-width: 1000px; padding: 48px 52px 100px; }
+h1, h2, h3 { color: var(--text-bright); margin: 2em 0 0.6em; scroll-margin-top: 20px; }
+h1 { font-size: 2em; border-bottom: 1px solid var(--border); padding-bottom: 0.4em; }
+h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
+h3 { color: var(--yellow); }
+p { margin: 0.8em 0; }
+code { font-family: monospace; background: var(--bg-surface); padding: 0.2em 0.4em; border-radius: 4px; color: var(--prop); border: 1px solid var(--border); }
 
-/* CRUD Card Component Styles */
-.crud-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; }
-.crud-header { display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: var(--bg-surface2); border-bottom: 1px solid var(--border); }
-.crud-method { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; font-family: monospace; }
+.dec-card { border-left: 4px solid var(--dec); background: var(--bg-surface2); padding: 16px; border-radius: 6px; margin: 1em 0; display: flex; gap: 16px; }
+.dec-card-name { font-family: monospace; color: var(--dec); font-weight: bold; min-width: 180px; }
+.crud-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; margin: 1.5em 0; overflow: hidden; }
+.crud-header { background: var(--bg-surface2); padding: 12px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+.crud-method { font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 4px; font-family: monospace; }
 .method-get { background: #1a3a28; color: #4ec9b0; }
-.crud-body { padding: 14px 16px; }
+.method-post { background: #1a2d0d; color: #89d185; }
+.method-patch { background: #2d2207; color: #dcdcaa; }
+.method-delete { background: #2d0a0a; color: #f44747; }
+.crud-body { padding: 16px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; font-size: 13px; }
 
-/* Decorator Card Component Styles */
-.dec-card { display: flex; gap: 12px; align-items: flex-start; background: var(--bg-surface2); border: 1px solid var(--border); border-left: 3px solid var(--dec); border-radius: 6px; padding: 12px; margin: 10px 0; font-size: 13px; }
-.dec-card-name { font-family: monospace; font-weight: 600; color: var(--dec); min-width: 130px; }
+.lifecycle-container { display: flex; flex-direction: column; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; margin: 2em 0; overflow: hidden; }
+@media (min-width: 992px) { .lifecycle-container { flex-direction: row; height: 520px; } }
+.lc-flow-panel { flex: 1.3; padding: 24px; overflow: auto; border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+.lc-detail-panel { flex: 0.7; padding: 24px; background: var(--bg-sidebar); }
+.lc-flow-scroll { flex: 1; display: flex; align-items: center; overflow-x: auto; padding: 20px 0; }
+.lc-flow { display: flex; align-items: center; gap: 0; min-width: max-content; }
+.lc-node { border-radius: 8px; padding: 14px; min-width: 140px; text-align: center; border: 1px solid; cursor: pointer; transition: 0.2s; }
+.lc-node.active { border-width: 2px; border-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
+
+.summary-table { width: 100%; border-collapse: collapse; margin: 2em 0; }
+.summary-table th, .summary-table td { border: 1px solid var(--border); padding: 12px; text-align: left; }
+.summary-table th { background: var(--bg-surface2); }
+.toc-item { display: block; padding: 5px 16px; font-size: 12.5px; color: var(--text-muted); text-decoration: none; }
+.toc-item:hover { background: var(--bg-hover); color: var(--text); }
   </style>
 </head>
 <body>
   <div class="page-wrap">
-    <nav class="sidebar">
-      <div style="padding: 16px; font-weight: bold;">TOC</div>
-      <a href="#cart-module" class="toc-item">Module Cart</a>
-    </nav>
+    <nav class="sidebar" id="sidebar"></nav>
     <main class="content">
-      <h1 id="cart-module">Giải Thích Chuyên Sâu - Module Cart (src/cart)</h1>
-      <p>Module <code>cart</code> là trái tim của hệ thống thương mại điện tử...</p>
+      <h1>Giải Thích Chi Tiết - Module Cart (src/cart)</h1>
+      <p>Module <code>cart</code> là trái tim của hệ thống thương mại điện tử, chịu trách nhiệm quản lý vòng đời giỏ hàng của người dùng.</p>
 
-      <h2>Request Lifecycle</h2>
+      <h2>Tóm tắt các thành phần</h2>
+      <table class="summary-table">
+        <thead>
+          <tr><th>Thành phần</th><th>Mô tả</th><th>Liên kết</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>CartController</strong></td><td>Cửa ngõ tiếp nhận request, bảo vệ bởi AuthGuard.</td><td><a href="#1-controller">Chi tiết</a></td></tr>
+          <tr><td><strong>CartService</strong></td><td>Logic nghiệp vụ phức tạp, tối ưu hóa với Redis.</td><td><a href="#2-service">Chi tiết</a></td></tr>
+          <tr><td><strong>Data Flow</strong></td><td>Luồng xử lý, Serialization và tác động chéo.</td><td><a href="#3-flow">Chi tiết</a></td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="1-controller">1. Tầng Giao Tiếp (Controllers): CartController</h2>
+      <p><code>CartController</code> là cửa ngõ tiếp nhận các HTTP request liên quan đến giỏ hàng.</p>
+
+      <h3>Phép Thuật Của @UseGuards(AuthGuard) và @Req() user</h3>
+      <div class="dec-card">
+        <div class="dec-card-name">@UseGuards(AuthGuard)</div>
+        <div class="dec-card-body">Xác thực JWT và gắn payload user vào object request.</div>
+      </div>
+      <div class="dec-card">
+        <div class="dec-card-name">@Req() user</div>
+        <div class="dec-card-body">Trích xuất <code>userId</code> an toàn từ token đã được Guard giải mã.</div>
+      </div>
+
+      <h3>Các Endpoints Chính</h3>
+      <div class="crud-card">
+        <div class="crud-header"><span class="crud-method method-get">GET</span><span class="crud-path">/cart</span></div>
+        <div class="crud-body">
+          <div><strong>Input:</strong> userId (từ token)</div>
+          <div><strong>Xử lý:</strong> Redis getOrSet</div>
+          <div><strong>Output:</strong> CartResponseDto</div>
+        </div>
+      </div>
+      <div class="crud-card">
+        <div class="crud-header"><span class="crud-method method-post">POST</span><span class="crud-path">/cart/items</span></div>
+        <div class="crud-body">
+          <div><strong>Input:</strong> AddCartItemDto</div>
+          <div><strong>Xử lý:</strong> validateProduct, getOrCreateCart, addItem</div>
+          <div><strong>Output:</strong> Updated Cart</div>
+        </div>
+      </div>
+
+      <h2 id="2-service">2. Tầng Nghiệp Vụ (Services): CartService</h2>
+      <p><code>CartService</code> là nơi chứa toàn bộ logic nghiệp vụ phức tạp, ứng dụng Redis Caching.</p>
+
+      <h3>Các Phương Thức Public</h3>
+      <ul>
+        <li><strong>getCart</strong>: Lấy từ cache hoặc DB (pattern getOrSet).</li>
+        <li><strong>addItem</strong>: Kiểm tra tồn kho, cộng dồn số lượng, làm mới cache.</li>
+        <li><strong>updateItem</strong>: Bảo mật quyền sở hữu (findOwnedCartItem), cập nhật số lượng.</li>
+        <li><strong>removeItem / clearCart</strong>: Dọn dẹp item và đồng bộ lại cache.</li>
+      </ul>
+
+      <h3>Các Phương Thức Private</h3>
+      <div class="dec-card">
+        <div class="dec-card-name">refreshCart()</div>
+        <div class="dec-card-body">Xóa cache Redis cũ và fetch lại dữ liệu mới nhất.</div>
+      </div>
+      <div class="dec-card">
+        <div class="dec-card-name">validateProduct()</div>
+        <div class="dec-card-body">Kiểm tra sản phẩm: tồn tại, ACTIVE, và đủ stock.</div>
+      </div>
+
+      <h2 id="3-flow">3. Theo Dấu Dữ Liệu: Trả Về & Tác Động Chéo</h2>
+      <p>Phân tích luồng từ Database thô đến JSON Response gọn gàng.</p>
+
       <div class="lifecycle-container">
         <div class="lc-flow-panel">
-          <div class="lifecycle-title">Request Lifecycle - GET /cart</div>
-          <div class="lc-node guard">
-            <div class="lc-node-label">AuthGuard</div>
+          <div class="lifecycle-title">Request Lifecycle - Add to Cart</div>
+          <div class="lc-flow-scroll">
+            <div class="lc-flow">
+              <div class="lc-node" data-node-name="Client" data-flow-in="DTO" data-flow-out="Request">
+                <div class="lc-node-label">Client</div>
+                <div class="lc-node-code">Browser</div>
+              </div>
+              <div class="lc-node" data-node-name="AuthGuard" data-flow-in="Token" data-flow-out="userId">
+                <div class="lc-node-label">Guard</div>
+                <div class="lc-node-code">Verify JWT</div>
+              </div>
+              <div class="lc-node" data-node-name="CartService" data-flow-in="userId, dto" data-flow-out="Update DB">
+                <div class="lc-node-label">Service</div>
+                <div class="lc-node-code">Business Logic</div>
+              </div>
+              <div class="lc-node" data-node-name="Redis" data-flow-in="Key" data-flow-out="Invalidate">
+                <div class="lc-node-label">Redis</div>
+                <div class="lc-node-code">Cache Management</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="lc-detail-panel" id="lc-detail">
+          <div class="lc-detail-empty">Click node để xem chi tiết...</div>
+          <div class="lc-detail-body" style="display:none;">
+            <h4 id="detail-name"></h4>
+            <p><strong>IN:</strong> <span id="detail-in"></span></p>
+            <p><strong>OUT:</strong> <span id="detail-out"></span></p>
           </div>
         </div>
       </div>
 
-      <h2>CRUD Operations</h2>
-      <div class="crud-card">
-        <div class="crud-header">
-          <span class="crud-method method-get">GET</span>
-          <span class="crud-path">/cart</span>
-        </div>
-        <div class="crud-body">Endpoint lấy giỏ hàng</div>
-      </div>
+      <h3>Lược Đồ Chuyển Đổi (Prisma.Decimal -> String)</h3>
+      <p>Để đảm bảo độ chính xác tuyệt đối, mọi phép toán tiền tệ được thực hiện qua <code>Prisma.Decimal</code>. Hàm <code>serializeCart</code> sẽ chuyển đổi kết quả cuối cùng sang <code>String</code> để tránh sai số dấu phẩy động trên trình duyệt.</p>
 
-      <h2>Decorators</h2>
-      <div class="dec-card">
-        <div class="dec-card-name">@Controller('cart')</div>
-        <div class="dec-card-body">Khai báo CartController</div>
-      </div>
+      <h2 id="4-lib">4. Tích Hợp Thư Viện</h2>
+      <ul>
+        <li><strong>Prisma</strong>: Ràng buộc duy nhất <code>cartId_productId</code> đảm bảo tính toàn vẹn dữ liệu.</li>
+        <li><strong>Redis</strong>: Tối ưu hiệu suất qua cơ chế Cache Hit/Miss.</li>
+      </ul>
     </main>
   </div>
+  <script>
+    function buildTOC() {
+      const sidebar = document.getElementById('sidebar');
+      const headings = document.querySelectorAll('h1, h2, h3');
+      headings.forEach(h => {
+        if (!h.id) h.id = h.innerText.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        const item = document.createElement('a');
+        item.className = 'toc-item';
+        item.href = '#' + h.id;
+        item.innerText = h.innerText;
+        sidebar.appendChild(item);
+      });
+    }
+    function initLifecycle() {
+      document.querySelectorAll('.lc-node').forEach(node => {
+        node.addEventListener('click', () => {
+          document.querySelectorAll('.lc-node').forEach(n => n.classList.remove('active'));
+          node.classList.add('active');
+          const panel = document.getElementById('lc-detail');
+          panel.querySelector('.lc-detail-empty').style.display = 'none';
+          panel.querySelector('.lc-detail-body').style.display = 'block';
+          document.getElementById('detail-name').innerText = node.dataset.nodeName;
+          document.getElementById('detail-in').innerText = node.dataset.flowIn;
+          document.getElementById('detail-out').innerText = node.dataset.flowOut;
+        });
+      });
+    }
+    document.addEventListener('DOMContentLoaded', () => { buildTOC(); initLifecycle(); });
+  </script>
 </body>
 </html>
-

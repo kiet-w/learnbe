@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Giải thích chi tiết Module Orders</title>
   <style>
-/* ═══════════════════════════════════════════
-   VSCode Dark Theme — NestJS Doc Renderer
-   ═══════════════════════════════════════════ */
+/* ── VSCode Dark Theme ── */
 :root {
   --bg:            #1e1e1e;
   --bg-sidebar:    #252526;
@@ -17,10 +15,12 @@
   --bg-active:     #37373d;
   --border:        #404040;
   --border-light:  #3c3c3c;
+
   --text:          #d4d4d4;
   --text-muted:    #858585;
   --text-bright:   #ffffff;
   --text-dim:      #6a6a6a;
+
   --kw:   #569cd6;
   --fn:   #dcdcaa;
   --str:  #ce9178;
@@ -30,12 +30,14 @@
   --dec:  #c586c0;
   --prop: #9cdcfe;
   --op:   #d4d4d4;
+
   --accent:  #007acc;
   --green:   #4ec9b0;
   --yellow:  #dcdcaa;
   --orange:  #ce9178;
   --red:     #f44747;
   --purple:  #c586c0;
+
   --node-guard:       #1a3a52;
   --node-guard-b:     #007acc;
   --node-pipe:        #1a3a28;
@@ -51,99 +53,402 @@
   --node-err:         #3a1a1a;
   --node-err-b:       #f44747;
 }
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: sans-serif; font-size: 14px; line-height: 1.7; overflow-x: hidden; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
 .page-wrap { display: flex; min-height: 100vh; }
-.sidebar { width: 260px; flex-shrink: 0; background: var(--bg-sidebar); border-right: 1px solid var(--border); position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 16px 0; }
-.sidebar-title { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-muted); padding: 0 16px 12px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
-.toc-item { display: block; padding: 5px 16px; font-size: 12.5px; color: var(--text-muted); text-decoration: none; border-left: 2px solid transparent; transition: all .15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 16px 0;
+}
+.sidebar-title {
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0 16px 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+.toc-item {
+  display: block;
+  padding: 5px 16px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: all .15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .toc-item:hover { background: var(--bg-hover); color: var(--text); }
 .toc-item.active { border-left-color: var(--accent); color: var(--text-bright); background: var(--bg-active); }
-.content { flex: 1; max-width: 960px; padding: 48px 52px 100px; min-width: 0; }
-h1,h2,h3 { color: var(--text-bright); font-weight: 600; margin: 2.2em 0 0.6em; }
-code { font-family: monospace; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 4px; padding: .15em .45em; color: var(--prop); }
-.lifecycle-container { display: flex; flex-direction: column; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; margin: 2em 0; overflow: hidden; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24); }
-@media (min-width: 992px) { .lifecycle-container { flex-direction: row; height: 520px; } }
-.lc-flow-panel { flex: 1.3; padding: 24px; overflow: auto; display: flex; flex-direction: column; border-bottom: 1px solid var(--border); }
-@media (min-width: 992px) { .lc-flow-panel { border-bottom: none; border-right: 1px solid var(--border); } }
-.lc-flow-scroll { flex: 1; display: flex; align-items: center; overflow-x: auto; padding: 20px 0; }
-.lc-flow { display: flex; align-items: center; min-width: max-content; margin: auto; }
-.lc-step { display: flex; flex-direction: column; align-items: center; position: relative; }
-.lc-node { border-radius: 8px; padding: 14px 18px; min-width: 140px; text-align: center; border: 1px solid; cursor: pointer; }
-.lc-node.guard  { background: var(--node-guard);  border-color: var(--node-guard-b); }
-.lc-node.pipe   { background: var(--node-pipe);   border-color: var(--node-pipe-b); }
-.lc-node.ctrl   { background: var(--node-ctrl);   border-color: var(--node-ctrl-b); }
-.lc-node.svc    { background: var(--node-svc);    border-color: var(--node-svc-b); }
-.lc-node.db     { background: var(--node-db);     border-color: var(--node-db-b); }
-.lc-node.client { background: var(--bg-surface2); border-color: var(--border); }
-.lc-node-label  { font-size: 12px; font-weight: 600; color: var(--text-bright); }
-.lc-connector { display: flex; align-items: center; padding: 0 4px; }
-.lc-line { height: 2px; width: 40px; background: var(--accent); }
-.lc-arrow { border-left: 6px solid var(--accent); border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
-.lc-detail-panel { flex: 1; padding: 24px; overflow-y: auto; }
-.lc-detail-empty { color: var(--text-muted); text-align: center; margin-top: 100px; }
-.dec-card { display: flex; gap: 12px; background: var(--bg-surface2); border-left: 3px solid var(--dec); padding: 12px 16px; margin: 10px 0; }
-.dec-card-name { color: var(--dec); font-weight: 600; }
-.crud-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; overflow: hidden; }
-.crud-header { display: flex; gap: 12px; padding: 10px 16px; background: var(--bg-surface2); }
-.crud-method { font-weight: 700; color: #89d185; }
+.toc-h2 { padding-left: 24px; }
+.toc-h3 { padding-left: 36px; font-size: 11.5px; }
+
+.content {
+  flex: 1;
+  max-width: 960px;
+  padding: 48px 52px 100px;
+  min-width: 0;
+}
+
+h1,h2,h3,h4 {
+  color: var(--text-bright);
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 2.2em 0 0.6em;
+  scroll-margin-top: 20px;
+}
+h1 { font-size: 1.9em; border-bottom: 1px solid var(--border); padding-bottom: .4em; margin-top: 0; }
+h2 { font-size: 1.45em; border-bottom: 1px solid var(--border); padding-bottom: .3em; }
+h3 { font-size: 1.2em; color: var(--yellow); }
+
+p { margin: .7em 0; }
+strong { color: var(--text-bright); font-weight: 600; }
+code {
+  font-family: 'Cascadia Code', 'Consolas', monospace;
+  font-size: .85em;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: .15em .45em;
+  color: var(--prop);
+}
+
+pre {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0;
+  margin: 1.2em 0;
+  overflow: hidden;
+}
+.pre-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-surface2);
+  border-bottom: 1px solid var(--border);
+  padding: 6px 14px;
+}
+.pre-lang { font-family: monospace; font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
+.pre-filename { font-family: monospace; font-size: 11px; color: var(--yellow); }
+pre code { display: block; background: none; border: none; padding: 18px 20px; font-size: .875em; line-height: 1.65; color: var(--text); overflow-x: auto; }
+
+.kw { color: var(--kw); }
+.fn { color: var(--fn); }
+.typ { color: var(--typ); }
+.dec { color: var(--dec); }
+.prop { color: var(--prop); }
+.cmt { color: var(--cmt); font-style: italic; }
+
+table { width: 100%; border-collapse: collapse; margin: 1.2em 0; font-size: 13px; }
+thead { background: var(--bg-surface2); }
+th { color: var(--text-bright); font-weight: 600; text-align: left; padding: 9px 14px; border: 1px solid var(--border); }
+td { padding: 7px 14px; border: 1px solid var(--border); }
+
+.dec-card {
+  display: flex; gap: 12px; align-items: flex-start;
+  background: var(--bg-surface2); border: 1px solid var(--border);
+  border-left: 3px solid var(--dec); border-radius: 6px;
+  padding: 12px 16px; margin: 10px 0; font-size: 13px;
+}
+.dec-card-name { font-family: monospace; font-size: 13px; color: var(--dec); font-weight: 600; min-width: 140px; }
+.dec-card-body { flex: 1; }
+.dec-card-desc { color: var(--text); margin-bottom: 4px; }
+.dec-card-effect { font-size: 12px; color: var(--text-muted); }
+.dec-card-effect b { color: var(--prop); font-weight: normal; }
+
+.crud-card {
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: 8px; margin: 12px 0; overflow: hidden;
+}
+.crud-header {
+  display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+  background: var(--bg-surface2); border-bottom: 1px solid var(--border);
+}
+.crud-method { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; font-family: monospace; }
+.method-get { background: #1a3a28; color: #4ec9b0; }
+.method-post { background: #1a2d0d; color: #89d185; }
+.crud-path { font-family: monospace; font-size: 13px; color: var(--text); }
+.crud-fn { font-family: monospace; font-size: 12px; color: var(--fn); margin-left: auto; }
 .crud-body { padding: 14px 16px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.crud-col-title { font-size: 10px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; }
+.crud-col-content { font-size: 12px; color: var(--text); line-height: 1.55; }
+
+.lifecycle-container {
+  display: flex; flex-direction: column; background: var(--bg-surface);
+  border: 1px solid var(--border); border-radius: 12px; margin: 2em 0;
+  overflow: hidden; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+}
+@media (min-width: 992px) { .lifecycle-container { flex-direction: row; height: 500px; } }
+.lc-flow-panel { flex: 1.3; padding: 24px; overflow: auto; display: flex; flex-direction: column; border-right: 1px solid var(--border); }
+.lc-detail-panel { flex: 1; padding: 24px; background: var(--bg-sidebar); overflow-y: auto; }
+.lifecycle-title { font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 24px; font-weight: 700; border-bottom: 1px dashed var(--border); padding-bottom: 12px; }
+.lc-flow-scroll { flex: 1; display: flex; align-items: center; overflow-x: auto; padding: 20px 0; }
+.lc-flow { display: flex; align-items: center; gap: 0; min-width: max-content; margin: auto; }
+.lc-step { display: flex; flex-direction: column; align-items: center; }
+.lc-node {
+  border-radius: 8px; padding: 12px 16px; min-width: 130px; text-align: center;
+  border: 1px solid; cursor: pointer; transition: all .2s;
+}
+.lc-node:hover { transform: translateY(-4px); box-shadow: 0 8px 16px rgba(0,0,0,.3); }
+.lc-node.active { transform: scale(1.05); border-width: 2px; }
+.lc-node.client { background: var(--bg-surface2); border-color: var(--border); }
+.lc-node.guard { background: var(--node-guard); border-color: var(--node-guard-b); }
+.lc-node.pipe { background: var(--node-pipe); border-color: var(--node-pipe-b); }
+.lc-node.ctrl { background: var(--node-ctrl); border-color: var(--node-ctrl-b); }
+.lc-node.svc { background: var(--node-svc); border-color: var(--node-svc-b); }
+.lc-node.db { background: var(--node-db); border-color: var(--node-db-b); }
+.lc-node-label { font-size: 12px; font-weight: 600; color: var(--text-bright); }
+.lc-connector { display: flex; align-items: center; padding: 0 4px; }
+.lc-line { height: 2px; width: 30px; background: var(--accent); position: relative; }
+.lc-arrow { width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 6px solid var(--accent); }
+
+.lc-detail-header { margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.lc-detail-type { font-size: 10px; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+.lc-detail-title { font-size: 16px; font-weight: 600; color: var(--text-bright); }
+.lc-flow-card { background: var(--bg-surface); border-radius: 6px; padding: 12px; margin-bottom: 12px; border: 1px solid var(--border); }
+.lc-flow-card-title { font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+.lc-flow-card-code { font-family: monospace; font-size: 12px; color: var(--yellow); margin-bottom: 4px; }
+.lc-flow-card-desc { font-size: 12.5px; line-height: 1.5; }
+
+.summary-table { margin-top: 2em; }
+.summary-table .lc-node { padding: 4px 8px; min-width: 80px; font-size: 11px; display: inline-block; }
   </style>
 </head>
 <body>
   <div class="page-wrap">
-    <nav class="sidebar" id="sidebar">
-      <div class="sidebar-title">Mục lục</div>
-    </nav>
+    <nav class="sidebar" id="sidebar"></nav>
     <main class="content">
       <h1>Giải thích chi tiết Module Orders</h1>
-      
-      <div id="lifecycle-container" class="lifecycle-container">
-          <div class="lc-flow-panel">
-            <div class="lifecycle-title">Request Lifecycle — POST /orders/checkout</div>
-            <div class="lc-flow-scroll">
-              <div class="lc-flow">
-                <div class="lc-step"><div class="lc-node client" data-node-name="Client"><div class="lc-node-label">Client</div></div></div>
-                <div class="lc-connector"><div class="lc-line"></div><div class="lc-arrow"></div></div>
-                <div class="lc-step"><div class="lc-node guard" data-node-name="AuthGuard"><div class="lc-node-label">AuthGuard</div></div></div>
+      <p>Tài liệu này cung cấp một cái nhìn sâu sắc (deep dive) vào sự tương tác giữa Controller và Service trong module <code>orders</code>. Nó sẽ đi sâu vào cách các endpoint hoạt động, cách xử lý transaction an toàn và định dạng dữ liệu trả về cho client.</p>
+
+      <div class="summary-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Thành phần</th>
+              <th>Cơ chế cốt lõi</th>
+              <th>Chi tiết</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Controllers</strong></td>
+              <td><div class="lc-node guard">AuthGuard</div> → <div class="lc-node pipe">ParseIntPipe</div></td>
+              <td><a href="#controllers">Xem chi tiết</a></td>
+            </tr>
+            <tr>
+              <td><strong>Services</strong></td>
+              <td><div class="lc-node db">$transaction</div> → <div class="lc-node db">updateMany</div></td>
+              <td><a href="#services">Xem chi tiết</a></td>
+            </tr>
+            <tr>
+              <td><strong>Output Flow</strong></td>
+              <td><div class="lc-node svc">Serializer</div> → <div class="lc-node client">success()</div></td>
+              <td><a href="#output">Xem chi tiết</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="controllers">1. Controllers (Bộ điều khiển)</h2>
+      <p>File <code>src/orders/orders.controller.ts</code> đóng vai trò là cửa ngõ nhận các HTTP request, xử lý kiểm tra bảo mật ban đầu và chuyển tiếp dữ liệu đến Service.</p>
+
+      <h3>Các Endpoints</h3>
+      <div class="crud-card">
+        <div class="crud-header">
+          <span class="crud-method method-post">POST</span>
+          <span class="crud-path">/orders/checkout</span>
+          <span class="crud-fn">checkout()</span>
+        </div>
+        <div class="crud-body">
+          <div><div class="crud-col-title">Input</div><div class="crud-col-content"><code>CheckoutDto</code></div></div>
+          <div><div class="crud-col-title">Xử lý</div><div class="crud-col-content">Tạo đơn hàng từ giỏ hàng</div></div>
+          <div><div class="crud-col-title">Output</div><div class="crud-col-content"><code>OrderResponse</code></div></div>
+        </div>
+      </div>
+      <div class="crud-card">
+        <div class="crud-header">
+          <span class="crud-method method-get">GET</span>
+          <span class="crud-path">/orders</span>
+          <span class="crud-fn">findOrders()</span>
+        </div>
+        <div class="crud-body">
+          <div><div class="crud-col-title">Input</div><div class="crud-col-content"><code>userId</code></div></div>
+          <div><div class="crud-col-title">Xử lý</div><div class="crud-col-content">Lấy danh sách đơn hàng user</div></div>
+          <div><div class="crud-col-title">Output</div><div class="crud-col-content"><code>OrderResponse[]</code></div></div>
+        </div>
+      </div>
+
+      <h3>Decorators và Trích xuất Dữ liệu</h3>
+      <div class="dec-card">
+        <div class="dec-card-name">@UseGuards(AuthGuard)</div>
+        <div class="dec-card-body">
+          <div class="dec-card-desc">Bảo vệ API, giải mã JWT và gán <code>request.user</code>.</div>
+        </div>
+      </div>
+      <div class="dec-card">
+        <div class="dec-card-name">ParseIntPipe</div>
+        <div class="dec-card-body">
+          <div class="dec-card-desc">Chuyển URL string sang number và validate 400 Bad Request.</div>
+        </div>
+      </div>
+
+      <h2 id="services">2. Services (Lớp Logic Nghiệp Vụ)</h2>
+      <p>File <code>src/orders/orders.service.ts</code> chứa toàn bộ logic kinh doanh cốt lõi của module orders.</p>
+
+      <h3>Deep dive: Phương thức checkout</h3>
+      <p>Phương thức <code>checkout</code> xử lý quá trình chuyển đổi một giỏ hàng thành đơn hàng thông qua 5 bước bọc trong <code>$transaction</code>.</p>
+      <ol>
+        <li>Lấy Giỏ hàng & Kiểm tra (Validation)</li>
+        <li>Tính toán Tổng tiền (Sử dụng <code>Prisma.Decimal</code>)</li>
+        <li>Tạo Đơn hàng (Snapshot giá sản phẩm tại thời điểm mua)</li>
+        <li>Trừ Tồn kho (Deduct Stock an toàn)</li>
+        <li>Hoàn tất Giỏ hàng (COMPLETED)</li>
+      </ol>
+
+      <div class="dec-card">
+        <div class="dec-card-name">Prisma $transaction</div>
+        <div class="dec-card-body">
+          <div class="dec-card-desc">Đảm bảo tính ACID: Thành công tất cả hoặc Rollback tất cả.</div>
+        </div>
+      </div>
+
+      <h3>Cơ chế Khóa Lạc quan với updateMany</h3>
+      <pre><div class="pre-header"><span class="pre-lang">typescript</span></div><code><span class="kw">const</span> updated = <span class="kw">await</span> tx.product.<span class="fn">updateMany</span>({
+  where: {
+    id: item.productId,
+    stock: { gte: item.quantity }, <span class="cmt">// ĐIỀU KIỆN THEN CHỐT</span>
+  },
+  data: { stock: { decrement: item.quantity } }
+});</code></pre>
+      <p>Cơ chế này ngăn chặn <strong>Race Condition</strong> bằng cách sử dụng Row-level lock của Database. Nếu tồn kho không đủ, <code>count</code> trả về 0 và throw exception để hủy transaction.</p>
+
+      <h2 id="output">3. Returns và Outputs: Luồng Dữ liệu và Tác động Chéo</h2>
+
+      <div class="lifecycle-container">
+        <div class="lc-flow-panel">
+          <div class="lifecycle-title">Request Lifecycle — POST /orders/checkout</div>
+          <div class="lc-flow-scroll">
+            <div class="lc-flow">
+              <div class="lc-step">
+                <div class="lc-node client active" data-type="Client" data-title="Client Browser" data-in="N/A" data-out="POST /checkout" data-desc="Gửi yêu cầu thanh toán giỏ hàng.">
+                  <div class="lc-node-label">Client</div>
+                </div>
+                <div class="lc-step-num">1</div>
+              </div>
+              <div class="lc-connector"><div class="lc-line"></div><div class="lc-arrow"></div></div>
+              <div class="lc-step">
+                <div class="lc-node db" data-type="Transaction" data-title="Prisma $transaction" data-in="CUD Operations" data-out="Success / Rollback" data-desc="Thực hiện các bước Create Order, Deduct Stock, Complete Cart.">
+                  <div class="lc-node-label">$transaction</div>
+                </div>
+                <div class="lc-step-num">2</div>
+              </div>
+              <div class="lc-connector"><div class="lc-line"></div><div class="lc-arrow"></div></div>
+              <div class="lc-step">
+                <div class="lc-node svc" data-type="Service" data-title="Serializer" data-in="Raw Decimal Data" data-out="Stringified DTO" data-desc="Chuyển đổi Decimal sang String để bảo toàn độ chính xác.">
+                  <div class="lc-node-label">Serializer</div>
+                </div>
+                <div class="lc-step-num">3</div>
+              </div>
+              <div class="lc-connector"><div class="lc-line"></div><div class="lc-arrow"></div></div>
+              <div class="lc-step">
+                <div class="lc-node ctrl" data-type="Controller" data-title="success() Wrapper" data-in="DTO object" data-out="JSON Response" data-desc="Bọc dữ liệu vào chuẩn API response chung.">
+                  <div class="lc-node-label">Wrapper</div>
+                </div>
+                <div class="lc-step-num">4</div>
               </div>
             </div>
           </div>
-          <div class="lc-detail-panel">
-            <div class="lc-detail-empty">Click node để xem chi tiết.</div>
-          </div>
-      </div>
-
-      <div class="dec-card">
-        <div class="dec-card-name">@UseGuards(AuthGuard)</div>
-        <div class="dec-card-body">Bảo vệ route khỏi truy cập trái phép.</div>
-      </div>
-
-      <div class="crud-card">
-        <div class="crud-header"><span class="crud-method">POST</span> <span>/orders/checkout</span></div>
-        <div class="crud-body">
-            <div>Input: CheckoutDto</div>
-            <div>Logic: Transaction</div>
-            <div>Output: OrderResponse</div>
+        </div>
+        <div class="lc-detail-panel" id="lc-detail">
+          <div class="lc-detail-empty">Click node để xem chi tiết luồng dữ liệu.</div>
         </div>
       </div>
+
+      <h3>Chi tiết Luồng Truyền tải Dữ liệu</h3>
+      <ul>
+        <li><strong>Serialization</strong>: Hàm <code>serializeOrder()</code> ép kiểu <code>Prisma.Decimal</code> về <code>string</code> để tránh sai số khi truyền qua JSON.</li>
+        <li><strong>Wrapping</strong>: Controller dùng <code>success()</code> để đồng nhất cấu trúc <code>{ success: true, data: { ... } }</code>.</li>
+      </ul>
+
+      <pre><div class="pre-header"><span class="pre-lang">json</span></div><code>{
+  <span class="prop">"success"</span>: <span class="kw">true</span>,
+  <span class="prop">"data"</span>: {
+    <span class="prop">"id"</span>: 1,
+    <span class="prop">"status"</span>: <span class="str">"PENDING"</span>,
+    <span class="prop">"total"</span>: <span class="str">"150000.00"</span>
+  }
+}</code></pre>
     </main>
   </div>
+
   <script>
+    function buildTOC() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.innerHTML = '<div class="sidebar-title">Mục lục</div>';
+      document.querySelectorAll('h2, h3').forEach(h => {
+        const link = document.createElement('a');
+        link.href = '#' + h.id;
+        link.className = 'toc-item toc-' + h.tagName.toLowerCase();
+        link.textContent = h.textContent;
+        sidebar.appendChild(link);
+      });
+    }
+
+    function initLifecycle() {
+      const nodes = document.querySelectorAll('.lc-node');
+      const detail = document.getElementById('lc-detail');
+      
+      nodes.forEach(node => {
+        node.addEventListener('click', () => {
+          nodes.forEach(n => n.classList.remove('active'));
+          node.classList.add('active');
+          
+          const { type, title, in: input, out, desc } = node.dataset;
+          detail.innerHTML = `
+            <div class="lc-detail-header">
+              <div class="lc-detail-type">${type}</div>
+              <div class="lc-detail-title">${title}</div>
+            </div>
+            <div class="lc-flow-card">
+              <div class="lc-flow-card-title">Dữ liệu vào (IN)</div>
+              <div class="lc-flow-card-code">${input}</div>
+            </div>
+            <div class="lc-flow-card">
+              <div class="lc-flow-card-title">Dữ liệu ra (OUT)</div>
+              <div class="lc-flow-card-code">${out}</div>
+              <div class="lc-flow-card-desc">${desc}</div>
+            </div>
+          `;
+        });
+      });
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
-        const toc = document.getElementById('sidebar');
-        document.querySelectorAll('h1, h2').forEach(h => {
-            if(!h.id) h.id = h.innerText.toLowerCase().replace(/ /g, '-');
-            const a = document.createElement('a');
-            a.className = 'toc-item'; a.href = '#' + h.id; a.innerText = h.innerText;
-            toc.appendChild(a);
-        });
-        document.querySelectorAll('.lc-node').forEach(node => {
-            node.addEventListener('click', () => {
-                document.querySelector('.lc-detail-empty').style.display = 'none';
-                document.querySelector('.lc-detail-panel').innerHTML = '<div style="color:white">' + node.dataset.nodeName + '</div>';
-            });
-        });
+      buildTOC();
+      initLifecycle();
     });
   </script>
 </body>

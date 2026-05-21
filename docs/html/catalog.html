@@ -6,9 +6,6 @@
   <title>Giải Thích Chi Tiết Chuyên Sâu - Module Catalog</title>
   <style>
 /* ── VSCode Dark Theme ── */
-/* ═══════════════════════════════════════════
-   VSCode Dark Theme — NestJS Doc Renderer
-   ═══════════════════════════════════════════ */
 :root {
   --bg:            #1e1e1e;
   --bg-sidebar:    #252526;
@@ -24,18 +21,16 @@
   --text-bright:   #ffffff;
   --text-dim:      #6a6a6a;
 
-  /* VSCode syntax colors */
-  --kw:   #569cd6;   /* keywords: export, const, async, return */
-  --fn:   #dcdcaa;   /* function names */
-  --str:  #ce9178;   /* strings */
-  --typ:  #4ec9b0;   /* types, classes, interfaces */
-  --cmt:  #6a9955;   /* comments */
-  --num:  #b5cea8;   /* numbers */
-  --dec:  #c586c0;   /* decorators @Get @Injectable */
-  --prop: #9cdcfe;   /* properties, params */
-  --op:   #d4d4d4;   /* operators */
+  --kw:   #569cd6;
+  --fn:   #dcdcaa;
+  --str:  #ce9178;
+  --typ:  #4ec9b0;
+  --cmt:  #6a9955;
+  --num:  #b5cea8;
+  --dec:  #c586c0;
+  --prop: #9cdcfe;
+  --op:   #d4d4d4;
 
-  /* Semantic accent colors */
   --accent:  #007acc;
   --green:   #4ec9b0;
   --yellow:  #dcdcaa;
@@ -43,7 +38,6 @@
   --red:     #f44747;
   --purple:  #c586c0;
 
-  /* Lifecycle node colors */
   --node-guard:       #1a3a52;
   --node-guard-b:     #007acc;
   --node-pipe:        #1a3a28;
@@ -71,7 +65,6 @@ body {
   overflow-x: hidden;
 }
 
-/* ── LAYOUT ── */
 .page-wrap { display: flex; min-height: 100vh; }
 
 .sidebar {
@@ -108,10 +101,8 @@ body {
 }
 .toc-item:hover { background: var(--bg-hover); color: var(--text); }
 .toc-item.active { border-left-color: var(--accent); color: var(--text-bright); background: var(--bg-active); }
-.toc-h1 { font-weight: 600; color: var(--text); }
 .toc-h2 { padding-left: 24px; }
 .toc-h3 { padding-left: 36px; font-size: 11.5px; }
-.toc-h4 { padding-left: 48px; font-size: 11px; }
 
 .content {
   flex: 1;
@@ -120,8 +111,7 @@ body {
   min-width: 0;
 }
 
-/* ── HEADINGS ── */
-h1,h2,h3,h4,h5,h6 {
+h1,h2,h3,h4 {
   color: var(--text-bright);
   font-weight: 600;
   line-height: 1.3;
@@ -131,20 +121,11 @@ h1,h2,h3,h4,h5,h6 {
 h1 { font-size: 1.9em; border-bottom: 1px solid var(--border); padding-bottom: .4em; margin-top: 0; }
 h2 { font-size: 1.45em; border-bottom: 1px solid var(--border); padding-bottom: .3em; }
 h3 { font-size: 1.2em; color: var(--yellow); }
-h4 { font-size: 1.05em; color: var(--prop); }
 
-/* ── BODY TEXT ── */
 p { margin: .7em 0; }
 strong { color: var(--text-bright); font-weight: 600; }
-em { font-style: italic; color: var(--orange); }
-del { color: var(--text-muted); text-decoration: line-through; }
-a { color: var(--accent); text-decoration: none; }
-a:hover { text-decoration: underline; }
-hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
-
-/* ── INLINE CODE ── */
 code {
-  font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  font-family: 'Cascadia Code', 'Consolas', monospace;
   font-size: .85em;
   background: var(--bg-surface);
   border: 1px solid var(--border);
@@ -153,7 +134,6 @@ code {
   color: var(--prop);
 }
 
-/* ── CODE BLOCKS ── */
 pre {
   background: var(--bg-surface);
   border: 1px solid var(--border);
@@ -161,7 +141,6 @@ pre {
   padding: 0;
   margin: 1.2em 0;
   overflow: hidden;
-  position: relative;
 }
 .pre-header {
   display: flex;
@@ -171,357 +150,347 @@ pre {
   border-bottom: 1px solid var(--border);
   padding: 6px 14px;
 }
-.pre-lang {
-  font-family: monospace;
-  font-size: 11px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: .08em;
-}
-.pre-filename {
-  font-family: monospace;
-  font-size: 11px;
-  color: var(--yellow);
-}
-pre code {
-  display: block;
-  background: none;
-  border: none;
-  padding: 18px 20px;
-  font-size: .875em;
-  line-height: 1.65;
-  color: var(--text);
-  overflow-x: auto;
-}
+.pre-lang { font-family: monospace; font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
+.pre-filename { font-family: monospace; font-size: 11px; color: var(--yellow); }
+pre code { display: block; background: none; border: none; padding: 18px 20px; font-size: .875em; line-height: 1.65; color: var(--text); overflow-x: auto; }
 
-/* Syntax token colors */
-.kw  { color: var(--kw); }
-.fn  { color: var(--fn); }
-.str { color: var(--str); }
+.kw { color: var(--kw); }
+.fn { color: var(--fn); }
 .typ { color: var(--typ); }
-.cmt { color: var(--cmt); font-style: italic; }
-.num { color: var(--num); }
 .dec { color: var(--dec); }
-.prop{ color: var(--prop); }
+.prop { color: var(--prop); }
+.cmt { color: var(--cmt); font-style: italic; }
 
-/* Decorator annotation tooltip */
-.dec-ann {
-  position: relative;
-  display: inline;
-}
-.dec-ann .ann-tip {
-  display: none;
-  position: absolute;
-  left: 0; top: 1.6em;
-  background: var(--bg-surface2);
-  border: 1px solid var(--dec);
-  border-radius: 6px;
-  padding: 8px 12px;
-  font-size: 11.5px;
-  color: var(--text);
-  white-space: nowrap;
-  z-index: 99;
-  min-width: 200px;
-  line-height: 1.5;
-  font-style: normal;
-  font-family: -apple-system, sans-serif;
-  pointer-events: none;
-}
-.dec-ann:hover .ann-tip { display: block; }
-.dec-ann > .dec { border-bottom: 1px dashed var(--dec); cursor: help; }
-
-/* ── LISTS ── */
-ul, ol { padding-left: 1.8em; margin: .7em 0; }
-li { margin: .3em 0; }
-li > ul, li > ol { margin: .25em 0; }
-
-/* ── TABLES ── */
 table { width: 100%; border-collapse: collapse; margin: 1.2em 0; font-size: 13px; }
 thead { background: var(--bg-surface2); }
 th { color: var(--text-bright); font-weight: 600; text-align: left; padding: 9px 14px; border: 1px solid var(--border); }
 td { padding: 7px 14px; border: 1px solid var(--border); }
-tr:hover td { background: var(--bg-hover); }
 
-/* ── BLOCKQUOTE ── */
-blockquote {
-  margin: 1em 0;
-  padding: 12px 18px;
-  border-left: 3px solid var(--accent);
-  background: var(--bg-surface);
-  border-radius: 0 6px 6px 0;
-  color: var(--text-muted);
-}
-blockquote p { margin: 0; }
-
-/* ── CALLOUT BOXES ── */
-.callout {
-  border-radius: 6px;
-  padding: 14px 18px;
-  margin: 1.2em 0;
-  border-left: 4px solid;
-  font-size: 13.5px;
-}
-.callout-note    { background: #0d2137; border-color: var(--accent); }
-.callout-warn    { background: #2d2207; border-color: var(--yellow); }
-.callout-danger  { background: #2d0a0a; border-color: var(--red); }
-.callout-tip     { background: #0d2117; border-color: var(--green); }
-.callout-title   { font-weight: 700; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 6px; }
-.callout-note .callout-title    { color: var(--accent); }
-.callout-warn .callout-title    { color: var(--yellow); }
-.callout-danger .callout-title  { color: var(--red); }
-.callout-tip .callout-title     { color: var(--green); }
-
-/* ═══════════════════════════════════════════
-   LIFECYCLE CONTAINER, CARDS (Added Interactive Components)
-   ═══════════════════════════════════════════ */
-
-.lifecycle-container {
-  display: flex;
-  flex-direction: column;
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  margin: 2em 0;
-  overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
-}
-@media (min-width: 992px) {
-  .lifecycle-container {
-    flex-direction: row;
-    height: 520px;
-  }
-}
-.lc-flow-panel {
-  flex: 1.3;
-  padding: 24px;
-  overflow: auto;
-  display: flex;
-  flex-direction: column;
-  border-bottom: 1px solid var(--border);
-}
-@media (min-width: 992px) {
-  .lc-flow-panel {
-    border-bottom: none;
-    border-right: 1px solid var(--border);
-  }
-}
-.lifecycle-title {
-  font-size: 11px;
-  letter-spacing: .15em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 24px;
-  font-weight: 700;
-  border-bottom: 1px dashed var(--border);
-  padding-bottom: 12px;
-}
-.lc-flow-scroll {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  overflow-x: auto;
-  padding: 20px 0;
-}
-.lc-flow {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  min-width: max-content;
-  margin: auto;
-}
-.lc-step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-}
-.lc-node {
-  border-radius: 8px;
-  padding: 14px 18px;
-  min-width: 140px;
-  max-width: 180px;
-  text-align: center;
-  border: 1px solid;
-  position: relative;
-  transition: all .25s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  user-select: none;
-}
-.lc-node:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0,0,0,.4);
-}
-.lc-node.active {
-  transform: scale(1.05);
-  border-width: 2px;
-}
-.lc-node.guard  { background: var(--node-guard);  border-color: var(--node-guard-b); }
-.lc-node.pipe   { background: var(--node-pipe);   border-color: var(--node-pipe-b); }
-.lc-node.ctrl   { background: var(--node-ctrl);   border-color: var(--node-ctrl-b); }
-.lc-node.svc    { background: var(--node-svc);    border-color: var(--node-svc-b); }
-.lc-node.db     { background: var(--node-db);     border-color: var(--node-db-b); }
-.lc-node.cache  { background: var(--node-cache);  border-color: var(--node-cache-b); }
-.lc-node.err    { background: var(--node-err);    border-color: var(--node-err-b); }
-.lc-node.client { background: var(--bg-surface2); border-color: var(--border); }
-.lc-node-label { font-size: 12px; font-weight: 600; color: var(--text-bright); margin-bottom: 4px; }
-.lc-node-code  { font-size: 10.5px; font-family: monospace; color: var(--text-muted); margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lc-node-desc  { font-size: 10px; color: var(--text-muted); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-
-.lc-connector {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 0 4px;
-}
-.lc-line {
-  height: 2px;
-  width: 40px;
-  background: linear-gradient(90deg, var(--border), var(--accent));
-  position: relative;
-  overflow: hidden;
-}
-.lc-arrow {
-  width: 0; height: 0;
-  border-top: 5px solid transparent;
-  border-bottom: 5px solid transparent;
-  border-left: 6px solid var(--accent);
-  margin-left: -1px;
-}
-.lc-step-num {
-  font-size: 10px;
-  color: var(--text-dim);
-  margin-top: 8px;
-  font-family: monospace;
-}
-
-/* Decorator explanation card */
 .dec-card {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  background: var(--bg-surface2);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--dec);
-  border-radius: 6px;
-  padding: 12px 16px;
-  margin: 10px 0;
-  font-size: 13px;
+  display: flex; gap: 12px; align-items: flex-start;
+  background: var(--bg-surface2); border: 1px solid var(--border);
+  border-left: 3px solid var(--dec); border-radius: 6px;
+  padding: 12px 16px; margin: 10px 0; font-size: 13px;
 }
-.dec-card-name { font-family: monospace; font-size: 13px; color: var(--dec); font-weight: 600; min-width: 130px; }
+.dec-card-name { font-family: monospace; font-size: 13px; color: var(--dec); font-weight: 600; min-width: 140px; }
 .dec-card-body { flex: 1; }
 .dec-card-desc { color: var(--text); margin-bottom: 4px; }
 .dec-card-effect { font-size: 12px; color: var(--text-muted); }
 .dec-card-effect b { color: var(--prop); font-weight: normal; }
 
-/* CRUD operation card */
 .crud-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  margin: 12px 0;
-  overflow: hidden;
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: 8px; margin: 12px 0; overflow: hidden;
 }
 .crud-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
-  background: var(--bg-surface2);
-  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+  background: var(--bg-surface2); border-bottom: 1px solid var(--border);
 }
-.crud-method {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .06em;
-  padding: 3px 10px;
-  border-radius: 4px;
-  font-family: monospace;
-}
-.method-get    { background: #1a3a28; color: #4ec9b0; }
-.method-post   { background: #1a2d0d; color: #89d185; }
+.crud-method { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; font-family: monospace; }
+.method-get { background: #1a3a28; color: #4ec9b0; }
 .crud-path { font-family: monospace; font-size: 13px; color: var(--text); }
-.crud-fn   { font-family: monospace; font-size: 12px; color: var(--fn); margin-left: auto; }
+.crud-fn { font-family: monospace; font-size: 12px; color: var(--fn); margin-left: auto; }
 .crud-body { padding: 14px 16px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
-.crud-col-title { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; }
+.crud-col-title { font-size: 10px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; }
 .crud-col-content { font-size: 12px; color: var(--text); line-height: 1.55; }
-.crud-col-content code { font-size: 11.5px; }
 
-</style>
+.lifecycle-container {
+  display: flex; flex-direction: column; background: var(--bg-surface);
+  border: 1px solid var(--border); border-radius: 12px; margin: 2em 0;
+  overflow: hidden; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+}
+@media (min-width: 992px) { .lifecycle-container { flex-direction: row; height: 500px; } }
+.lc-flow-panel { flex: 1.3; padding: 24px; overflow: auto; display: flex; flex-direction: column; border-right: 1px solid var(--border); }
+.lc-detail-panel { flex: 1; padding: 24px; background: var(--bg-sidebar); overflow-y: auto; }
+.lifecycle-title { font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 24px; font-weight: 700; border-bottom: 1px dashed var(--border); padding-bottom: 12px; }
+.lc-flow-scroll { flex: 1; display: flex; align-items: center; overflow-x: auto; padding: 20px 0; }
+.lc-flow { display: flex; align-items: center; gap: 0; min-width: max-content; margin: auto; }
+.lc-step { display: flex; flex-direction: column; align-items: center; }
+.lc-node {
+  border-radius: 8px; padding: 12px 16px; min-width: 130px; text-align: center;
+  border: 1px solid; cursor: pointer; transition: all .2s;
+}
+.lc-node:hover { transform: translateY(-4px); box-shadow: 0 8px 16px rgba(0,0,0,.3); }
+.lc-node.active { transform: scale(1.05); border-width: 2px; }
+.lc-node.client { background: var(--bg-surface2); border-color: var(--border); }
+.lc-node.guard { background: var(--node-guard); border-color: var(--node-guard-b); }
+.lc-node.pipe { background: var(--node-pipe); border-color: var(--node-pipe-b); }
+.lc-node.ctrl { background: var(--node-ctrl); border-color: var(--node-ctrl-b); }
+.lc-node.svc { background: var(--node-svc); border-color: var(--node-svc-b); }
+.lc-node.db { background: var(--node-db); border-color: var(--node-db-b); }
+.lc-node.cache { background: var(--node-cache); border-color: var(--node-cache-b); }
+.lc-node-label { font-size: 12px; font-weight: 600; color: var(--text-bright); }
+.lc-node-code { font-size: 10px; font-family: monospace; color: var(--text-muted); }
+.lc-connector { display: flex; align-items: center; padding: 0 4px; }
+.lc-line { height: 2px; width: 30px; background: var(--accent); position: relative; }
+.lc-arrow { width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 6px solid var(--accent); }
+
+.lc-detail-header { margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.lc-detail-type { font-size: 10px; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+.lc-detail-title { font-size: 16px; font-weight: 600; color: var(--text-bright); }
+.lc-flow-card { background: var(--bg-surface); border-radius: 6px; padding: 12px; margin-bottom: 12px; border: 1px solid var(--border); }
+.lc-flow-card-title { font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+.lc-flow-card-code { font-family: monospace; font-size: 12px; color: var(--yellow); margin-bottom: 4px; }
+.lc-flow-card-desc { font-size: 12.5px; line-height: 1.5; }
+
+.summary-table { margin-top: 2em; }
+.summary-table .lc-node { padding: 4px 8px; min-width: 80px; font-size: 11px; display: inline-block; }
+  </style>
 </head>
 <body>
   <div class="page-wrap">
     <nav class="sidebar" id="sidebar"></nav>
     <main class="content">
       <h1>Giải Thích Chi Tiết Chuyên Sâu - Module Catalog (src/catalog)</h1>
-      <p>Module Catalog là "quầy trưng bày" của hệ thống e-commerce, chịu trách nhiệm quản lý danh mục sản phẩm (Product) và phân loại (Category). Đây là module có tần suất truy vấn cao nhất (Read-heavy).</p>
-      
-      <h2 id="lifecycle">Lifecycle xử lý request Catalog</h2>
-      <div class="lifecycle-container">
-          <div class="lc-flow-panel">
-            <div class="lifecycle-title">Request Lifecycle — GET /catalog/categories</div>
-            <div class="lc-flow-scroll">
-              <div class="lc-flow">
-                <!-- Node: Client -->
-                <div class="lc-step">
-                  <div class="lc-node client">
-                    <div class="lc-node-label">Client</div>
-                    <div class="lc-node-desc">Gửi yêu cầu danh mục</div>
-                  </div>
-                  <div class="lc-step-num">①</div>
-                </div>
-                <!-- Connector -->
-                <div class="lc-connector"><div class="lc-line"></div><div class="lc-arrow"></div></div>
-                <!-- Node: Controller -->
-                <div class="lc-step">
-                  <div class="lc-node ctrl">
-                    <div class="lc-node-label">CatalogController</div>
-                    <div class="lc-node-desc">Nhận yêu cầu</div>
-                  </div>
-                  <div class="lc-step-num">②</div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="lc-detail-panel">
-            <div class="lc-detail-empty">Click vào một node để xem chi tiết.</div>
-          </div>
+      <p>Module Catalog là "quầy trưng bày" của hệ thống e-commerce, chịu trách nhiệm xử lý các luồng dữ liệu liên quan đến danh mục, sản phẩm, tìm kiếm và lọc. Đặc thù của module này là <strong>lượng truy cập đọc (read-heavy) rất lớn</strong>, do đó kiến trúc của nó tập trung tối đa vào tối ưu hoá hiệu năng (Performance) và bộ nhớ đệm (Caching).</p>
+
+      <div class="summary-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Thành phần</th>
+              <th>Luồng xử lý chính</th>
+              <th>Chi tiết</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Controllers</strong></td>
+              <td><div class="lc-node pipe">@Query</div> → <div class="lc-node ctrl">Dto</div></td>
+              <td><a href="#controllers">Xem chi tiết</a></td>
+            </tr>
+            <tr>
+              <td><strong>Services</strong></td>
+              <td><div class="lc-node cache">Redis</div> → <div class="lc-node db">Prisma</div></td>
+              <td><a href="#services">Xem chi tiết</a></td>
+            </tr>
+            <tr>
+              <td><strong>Output Flow</strong></td>
+              <td><div class="lc-node svc">Logic</div> → <div class="lc-node client">paginated()</div></td>
+              <td><a href="#output">Xem chi tiết</a></td>
+            </tr>
+            <tr>
+              <td><strong>Performance</strong></td>
+              <td><div class="lc-node db">Promise.all</div> → <div class="lc-node cache">Cache-Aside</div></td>
+              <td><a href="#performance">Xem chi tiết</a></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      
-      <h2 id="endpoints">Các API (CRUD)</h2>
+
+      <h2 id="controllers">1. Controllers: Lớp Giao Tiếp Đầu Vào (catalog.controller.ts)</h2>
+      <p><code>CatalogController</code> là điểm chạm đầu tiên tiếp nhận các request từ client.</p>
+
+      <h3>1.1 Chi Tiết Endpoint và Xử Lý Dữ Liệu</h3>
+      <p>Module có 3 endpoints chính:</p>
       <div class="crud-card">
         <div class="crud-header">
           <span class="crud-method method-get">GET</span>
-          <span class="crud-path">/catalog/categories</span>
-          <span class="crud-fn">findAllCategories()</span>
+          <span class="crud-path">/categories</span>
+          <span class="crud-fn">findCategories()</span>
         </div>
         <div class="crud-body">
-            <div>
-              <div class="crud-col-title">Input</div>
-              <div class="crud-col-content">N/A</div>
-            </div>
-            <div>
-              <div class="crud-col-title">Xử lý</div>
-              <div class="crud-col-content">Lấy toàn bộ danh mục từ DB</div>
-            </div>
-            <div>
-              <div class="crud-col-title">Output</div>
-              <div class="crud-col-content">List Categories JSON</div>
-            </div>
+          <div><div class="crud-col-title">Input</div><div class="crud-col-content">N/A</div></div>
+          <div><div class="crud-col-title">Xử lý</div><div class="crud-col-content">Gọi service lấy danh mục</div></div>
+          <div><div class="crud-col-title">Output</div><div class="crud-col-content">List Categories JSON</div></div>
+        </div>
+      </div>
+      <div class="crud-card">
+        <div class="crud-header">
+          <span class="crud-method method-get">GET</span>
+          <span class="crud-path">/products</span>
+          <span class="crud-fn">findProducts()</span>
+        </div>
+        <div class="crud-body">
+          <div><div class="crud-col-title">Input</div><div class="crud-col-content"><code>ProductQueryDto</code></div></div>
+          <div><div class="crud-col-title">Xử lý</div><div class="crud-col-content">Phân trang, lọc, tìm kiếm</div></div>
+          <div><div class="crud-col-title">Output</div><div class="crud-col-content">Paginated Products</div></div>
+        </div>
+      </div>
+      <div class="crud-card">
+        <div class="crud-header">
+          <span class="crud-method method-get">GET</span>
+          <span class="crud-path">/products/:slug</span>
+          <span class="crud-fn">findProductBySlug()</span>
+        </div>
+        <div class="crud-body">
+          <div><div class="crud-col-title">Input</div><div class="crud-col-content"><code>slug: string</code></div></div>
+          <div><div class="crud-col-title">Xử lý</div><div class="crud-col-content">Tìm chi tiết sản phẩm</div></div>
+          <div><div class="crud-col-title">Output</div><div class="crud-col-content">Product Detail JSON</div></div>
         </div>
       </div>
 
-      <h2 id="decorators">Decorators</h2>
+      <h3>1.2 Cơ Chế Ánh Xạ URL Query Vào DTO (@Query() query: ProductQueryDto)</h3>
       <div class="dec-card">
-        <div class="dec-card-name">@Controller('catalog')</div>
+        <div class="dec-card-name">@Query()</div>
         <div class="dec-card-body">
-            <div class="dec-card-desc">Gán prefix /catalog cho tất cả routes trong controller.</div>
+          <div class="dec-card-desc">Lấy tham số từ URL Query String và map vào object.</div>
+          <div class="dec-card-effect"><b>Tác động:</b> Tự động instantiate <code>ProductQueryDto</code> thông qua ValidationPipe.</div>
         </div>
       </div>
+      <p>Trong endpoint <code>GET /products</code>, NestJS sử dụng <strong>Global ValidationPipe</strong> để tự động khởi tạo object. <code>ProductQueryDto</code> kế thừa từ <code>PaginationQueryDto</code> giúp tái sử dụng logic phân trang hệ thống.</p>
+
+      <h2 id="services">2. Services: Lõi Logic Trọng Tâm (catalog.service.ts)</h2>
+      <p><code>CatalogService</code> thực thi Business Logic, tách biệt public API và private helpers.</p>
+
+      <h3>2.1 Các Phương Thức Public</h3>
+      <ul>
+        <li><strong>findCategories()</strong>: Trả về danh mục, tận dụng Redis <code>getOrSet</code>.</li>
+        <li><strong>findProducts(query)</strong>: Điều phối phân trang, tạo cache key, thực thi song song Prisma query qua <code>Promise.all</code>.</li>
+        <li><strong>findProductBySlug(slug)</strong>: Lấy chi tiết qua Cache, validate trạng thái ACTIVE.</li>
+      </ul>
+
+      <pre><div class="pre-header"><span class="pre-lang">typescript</span><span class="pre-filename">catalog.service.ts</span></div><code><span class="kw">async</span> <span class="fn">findProducts</span>(query: <span class="typ">ProductQueryDto</span>) {
+  <span class="kw">const</span> { page = 1, limit = 10 } = query;
+  <span class="kw">const</span> skip = (page - 1) * limit;
+  <span class="kw">const</span> cacheKey = <span class="kw">this</span>.<span class="fn">getProductsCacheKey</span>(query, page, limit);
+
+  <span class="kw">return</span> <span class="kw">this</span>.redisService.<span class="fn">getOrSet</span>(cacheKey, <span class="kw">async</span> () => {
+    <span class="kw">const</span> where = <span class="kw">this</span>.<span class="fn">buildProductWhere</span>(query);
+    <span class="kw">const</span> [items, total] = <span class="kw">await</span> <span class="typ">Promise</span>.<span class="fn">all</span>([
+      <span class="kw">this</span>.prisma.product.<span class="fn">findMany</span>({ where, skip, take: limit }),
+      <span class="kw">this</span>.prisma.product.<span class="fn">count</span>({ where })
+    ]);
+    <span class="kw">return</span> { data: items.<span class="fn">map</span>(p => <span class="kw">this</span>.<span class="fn">serializeProduct</span>(p)), total, page, limit };
+  });
+}</code></pre>
+
+      <h3>2.2 Tương Tác Với Các Private Helpers</h3>
+      <div class="dec-card">
+        <div class="dec-card-name">serializeProduct</div>
+        <div class="dec-card-body">
+          <div class="dec-card-desc">Data Mapper chuẩn hóa dữ liệu Prisma sang JSON.</div>
+          <div class="dec-card-effect"><b>Quan trọng:</b> Biến đổi <code>Decimal</code> sang <code>string</code> để bảo toàn độ chính xác tài chính.</div>
+        </div>
+      </div>
+      <ul>
+        <li><code>buildProductWhere</code>: Chuyển DTO sang <code>Prisma.ProductWhereInput</code>.</li>
+        <li><code>getProductOrderBy</code>: Dịch enum sort sang Prisma order object.</li>
+        <li><code>getProductsCacheKey</code>: Sinh unique key dựa trên query params.</li>
+      </ul>
+
+      <h2 id="output">3. Quản Lý Đầu Ra và Dòng Chảy Dữ Liệu</h2>
+      
+      <div class="lifecycle-container">
+        <div class="lc-flow-panel">
+          <div class="lifecycle-title">Request Lifecycle — GET /products</div>
+          <div class="lc-flow-scroll">
+            <div class="lc-flow">
+              <div class="lc-step">
+                <div class="lc-node client active" data-type="Client" data-title="Client Browser" data-in="N/A" data-out="HTTP GET /products?search=..." data-desc="Gửi request tìm kiếm sản phẩm.">
+                  <div class="lc-node-label">Client</div>
+                </div>
+                <div class="lc-step-num">1</div>
+              </div>
+              <div class="lc-connector"><div class="lc-line"></div><div class="lc-arrow"></div></div>
+              <div class="lc-step">
+                <div class="lc-node ctrl" data-type="Controller" data-title="CatalogController" data-in="Query Params" data-out="findProducts(dto)" data-desc="Nhận và validate query parameters.">
+                  <div class="lc-node-label">Controller</div>
+                </div>
+                <div class="lc-step-num">2</div>
+              </div>
+              <div class="lc-connector"><div class="lc-line"></div><div class="lc-arrow"></div></div>
+              <div class="lc-step">
+                <div class="lc-node cache" data-type="Cache" data-title="Redis Service" data-in="Cache Key" data-out="Data (if Hit) / Next (if Miss)" data-desc="Kiểm tra dữ liệu trong bộ nhớ đệm RAM.">
+                  <div class="lc-node-label">Redis</div>
+                </div>
+                <div class="lc-step-num">3</div>
+              </div>
+              <div class="lc-connector"><div class="lc-line"></div><div class="lc-arrow"></div></div>
+              <div class="lc-step">
+                <div class="lc-node db" data-type="DB" data-title="Prisma / PostgreSQL" data-in="SQL Query" data-out="Raw Data" data-desc="Truy vấn database nếu cache miss.">
+                  <div class="lc-node-label">Database</div>
+                </div>
+                <div class="lc-step-num">4</div>
+              </div>
+              <div class="lc-connector"><div class="lc-line"></div><div class="lc-arrow"></div></div>
+              <div class="lc-step">
+                <div class="lc-node svc" data-type="Service" data-title="paginated() Wrapper" data-in="Raw Object" data-out="Standard JSON Response" data-desc="Đóng gói dữ liệu vào chuẩn success/data/meta.">
+                  <div class="lc-node-label">Wrapper</div>
+                </div>
+                <div class="lc-step-num">5</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="lc-detail-panel" id="lc-detail">
+          <div class="lc-detail-header">
+            <div class="lc-detail-type">Client</div>
+            <div class="lc-detail-title">Client Browser</div>
+          </div>
+          <div class="lc-flow-card">
+            <div class="lc-flow-card-title">Dữ liệu ra (OUT)</div>
+            <div class="lc-flow-card-code">HTTP GET /products?search=...</div>
+            <div class="lc-flow-card-desc">Gửi request tìm kiếm sản phẩm.</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 id="cross-impacts">3.2 Tác Động Chéo Giữa Các Module</h3>
+      <p>Module Catalog phụ thuộc hoàn toàn vào <strong>Redis Cache</strong>. Trách nhiệm làm mới dữ liệu thuộc về <strong>Admin Module</strong>. Khi Admin thực hiện CUD, Admin Service sẽ invalidate cache keys tương ứng.</p>
+
+      <h3>3.5 Cấu Trúc JSON Trả Về Client</h3>
+      <pre><div class="pre-header"><span class="pre-lang">json</span></div><code>{
+  <span class="prop">"success"</span>: <span class="kw">true</span>,
+  <span class="prop">"data"</span>: [{ <span class="prop">"id"</span>: 1, <span class="prop">"name"</span>: <span class="str">"Sản phẩm A"</span>, <span class="prop">"price"</span>: <span class="str">"1000.00"</span> }],
+  <span class="prop">"meta"</span>: { <span class="prop">"total"</span>: 150, <span class="prop">"page"</span>: 1, <span class="prop">"limit"</span>: 10, <span class="prop">"totalPages"</span>: 15 }
+}</code></pre>
+
+      <h2 id="performance">4. Tích Hợp Third-Party & Thư Viện</h2>
+      <h3>4.1 Tối Ưu Bằng Promise.all Với Prisma</h3>
+      <p>Sử dụng <code>Promise.all()</code> để thực thi song song <code>findMany</code> và <code>count</code>, giảm gần một nửa thời gian chờ I/O.</p>
+      
+      <h3>4.2 Pattern Cache-Aside Với redisService.getOrSet</h3>
+      <p>Cơ chế: Kiểm tra Redis (Hit) -> Trả ngay. Nếu Miss -> Query DB -> Lưu Redis (TTL) -> Trả dữ liệu. Đảm bảo hệ thống "đỡ" được traffic CCU lớn.</p>
     </main>
   </div>
+
   <script>
-    // Placeholder for required interactivity
+    function buildTOC() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.innerHTML = '<div class="sidebar-title">Mục lục</div>';
+      document.querySelectorAll('h2, h3').forEach(h => {
+        const link = document.createElement('a');
+        link.href = '#' + h.id;
+        link.className = 'toc-item toc-' + h.tagName.toLowerCase();
+        link.textContent = h.textContent;
+        sidebar.appendChild(link);
+      });
+    }
+
+    function initLifecycle() {
+      const nodes = document.querySelectorAll('.lc-node');
+      const detail = document.getElementById('lc-detail');
+      
+      nodes.forEach(node => {
+        node.addEventListener('click', () => {
+          nodes.forEach(n => n.classList.remove('active'));
+          node.classList.add('active');
+          
+          const { type, title, in: input, out, desc } = node.dataset;
+          detail.innerHTML = `
+            <div class="lc-detail-header">
+              <div class="lc-detail-type">${type}</div>
+              <div class="lc-detail-title">${title}</div>
+            </div>
+            <div class="lc-flow-card">
+              <div class="lc-flow-card-title">Dữ liệu vào (IN)</div>
+              <div class="lc-flow-card-code">${input}</div>
+            </div>
+            <div class="lc-flow-card">
+              <div class="lc-flow-card-title">Dữ liệu ra (OUT)</div>
+              <div class="lc-flow-card-code">${out}</div>
+              <div class="lc-flow-card-desc">${desc}</div>
+            </div>
+          `;
+        });
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      buildTOC();
+      initLifecycle();
+    });
   </script>
 </body>
 </html>
