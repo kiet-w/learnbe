@@ -7,23 +7,7 @@ import {
 import { CartStatus, OrderStatus, Prisma, ProductStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CheckoutDto } from './dto/checkout.dto';
-
-type OrderResponse = {
-  id: number;
-  status: OrderStatus;
-  total: string;
-  address: string;
-  createdAt: Date;
-  updatedAt: Date;
-  items: Array<{
-    id: number;
-    productId: number;
-    productName: string;
-    productPrice: string;
-    quantity: number;
-    subtotal: string;
-  }>;
-};
+import { OrderResponseDto } from './dto/order-response.dto';
 
 @Injectable()
 export class OrdersService {
@@ -31,7 +15,7 @@ export class OrdersService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async checkout(userId: number, dto: CheckoutDto): Promise<OrderResponse> {
+  async checkout(userId: number, dto: CheckoutDto): Promise<OrderResponseDto> {
     try {
       const order = await this.prisma.$transaction(async (tx) => {
         const cart = await tx.cart.findFirst({
@@ -132,7 +116,7 @@ export class OrdersService {
     }
   }
 
-  async findOrders(userId: number): Promise<OrderResponse[]> {
+  async findOrders(userId: number): Promise<OrderResponseDto[]> {
     const orders = await this.prisma.order.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
@@ -144,7 +128,7 @@ export class OrdersService {
     return orders.map((order) => this.serializeOrder(order));
   }
 
-  async findOrderById(userId: number, orderId: number): Promise<OrderResponse> {
+  async findOrderById(userId: number, orderId: number): Promise<OrderResponseDto> {
     const order = await this.prisma.order.findFirst({
       where: {
         id: orderId,
@@ -168,7 +152,7 @@ export class OrdersService {
         items: true;
       };
     }>,
-  ): OrderResponse {
+  ): OrderResponseDto {
     return {
       id: order.id,
       status: order.status,
