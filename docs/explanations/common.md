@@ -1,124 +1,82 @@
-# Giải Thích Chi Tiết - Module Common (`src/common`)
+# Giải Thích Chuyên Sâu - Module Common (`src/common`)
 
-Khác với các module chứa logic nghiệp vụ cụ thể (như `user`, `cart`, `catalog`), `common` là module chứa các công cụ, tiện ích, cấu hình và các lớp bảo vệ dùng chung cho toàn bộ hệ thống. Mục tiêu của `common` là giảm thiểu code lặp lại (DRY - Don't Repeat Yourself) và chuẩn hóa cấu trúc ứng dụng.
+Khác với các module chứa logic nghiệp vụ cụ thể (như `user`, `cart`, `catalog`), `common` là module chứa các công cụ, tiện ích, cấu hình và các lớp bảo vệ dùng chung cho toàn bộ hệ thống. Mục tiêu cốt lõi của `common` là giảm thiểu code lặp lại (DRY - Don't Repeat Yourself), tăng tính nhất quán và chuẩn hóa toàn bộ ứng dụng NestJS.
 
-Dưới đây là tài liệu cực kỳ chi tiết về toàn bộ các thành phần trong `src/common`.
-
----
-
-## 1. Constants (Hằng Số Toàn Cục)
-**File:** `src/common/constants/cache.constants.ts`
-
-Chứa các cấu hình mặc định liên quan đến bộ nhớ đệm (Cache/Redis), đảm bảo tính nhất quán trên toàn hệ thống thay vì gõ cứng (hard-code) các chuỗi văn bản và con số.
-
-* **`CACHE_KEYS`**: Đối tượng định nghĩa hoặc tạo ra các chuỗi Key lưu trong Redis.
-  * `PRODUCTS`: `'products:list'` (Key cache danh sách sản phẩm chung).
-  * `PRODUCT`: Hàm `(slug: string) => "products:${slug}"` (Tạo key động dựa vào slug của sản phẩm).
-  * `CATEGORIES`: `'categories:list'` (Key cache danh sách danh mục).
-  * `CART`: Hàm `(userId: number) => "cart:${userId}"` (Tạo key động theo ID của user cho giỏ hàng).
-* **`CACHE_TTL`**: Đối tượng định nghĩa thời gian sống (Time-To-Live) của cache (đơn vị: milliseconds).
-  * `PRODUCTS`: `5 * 60 * 1000` (5 phút).
-  * `PRODUCT`: `10 * 60 * 1000` (10 phút).
-  * `CATEGORIES`: `60 * 60 * 1000` (1 giờ).
-  * `CART`: `10 * 60 * 1000` (10 phút).
+Dưới đây là tài liệu đi sâu vào các cơ chế quan trọng nhất của `src/common`.
 
 ---
 
-## 2. Decorators (Thẻ Đánh Dấu Tùy Chỉnh)
-**File:** `src/common/decorators/roles.decorator.ts`
+## 1. Decorators & Guards: Hệ Thống Phân Quyền Xuyên Suốt
 
-NestJS sử dụng Decorator (như `@Get`, `@Post`) để thêm metadata. Ta tạo ra `@Roles()` để gắn nhãn phân quyền cho các endpoint.
+Để bảo vệ các API khỏi những truy cập không hợp lệ, ứng dụng sử dụng cơ chế Decorator kết hợp với Guard. Đây là một quy trình tinh tế gồm 2 bước: "Dán nhãn" và "Kiểm tra nhãn".
 
-* **`ROLES_KEY`**: Hằng số chuỗi `'roles'` được dùng làm chìa khóa (key) lưu metadata.
-* **Hàm `Roles(...roles: UserRole[])`**: 
-  * **Input**: Một danh sách (mảng các tham số - rest parameters) các quyền (enum `UserRole` từ Prisma, ví dụ `ADMIN`, `USER`).
-  * **Output**: Sử dụng `SetMetadata` của NestJS để ghim mảng các roles này vào handler (hàm xử lý API) hoặc class Controller dưới key là `'roles'`.
-  * **Sử dụng**: Ví dụ `@Roles(UserRole.ADMIN)` để đánh dấu endpoint này chỉ dành cho Admin.
+### `@Roles()` Decorator (`src/common/decorators/roles.decorator.ts`)
+Thay vì viết logic kiểm tra quyền hạn vào từng hàm xử lý (controller handler), ta tạo ra một Custom Decorator.
+- **Hoạt động:** Hàm `Roles(...roles: UserRole[])` nhận vào một danh sách các quyền (ví dụ `ADMIN`, `USER`). 
+- **Bản chất:** Nó sử dụng `SetMetadata` của NestJS để "ghim" ẩn một siêu dữ liệu (metadata) với từ khóa `ROLES_KEY` (`'roles'`) vào chính Class hoặc Method Controller đó.
+- **Ví dụ:** Khi bạn gắn `@Roles(UserRole.ADMIN)` lên trên phương thức xóa người dùng, bạn mới chỉ "dán nhãn" yêu cầu cho nó, chứ chưa thực sự chặn ai cả.
 
----
-
-## 3. DTOs (Data Transfer Objects Dùng Chung)
-**File:** `src/common/dto/pagination-query.dto.ts`
-
-Class DTO này dùng để chuẩn hóa và xác thực dữ liệu gửi lên qua Query String (`?page=1&limit=10...`) cho các API lấy danh sách.
-
-* **Type `SortQuery`**: Chỉ cho phép 4 giá trị sắp xếp: `'price_asc'`, `'price_desc'`, `'created_asc'`, `'created_desc'`.
-* **Class `PaginationQueryDto`**:
-  * `page` (Number): Mặc định là 1. Phải là số nguyên dương (`@IsInt()`, `@IsPositive()`).
-  * `limit` (Number): Mặc định là 10. Phải là số nguyên dương và tối đa là 100 (`@Max(100)`).
-  * `search` (String): Tùy chọn. Sẽ tự động loại bỏ khoảng trắng ở 2 đầu nhờ hàm `@Transform`. Nếu chuỗi rỗng sẽ bị ép về `undefined`.
-  * `category` (Number): Tùy chọn. ID của danh mục, phải là số nguyên dương.
-  * `minPrice` (String): Tùy chọn, giá tối thiểu. Tự động trim khoảng trắng.
-  * `maxPrice` (String): Tùy chọn, giá tối đa. Tự động trim khoảng trắng.
-  * `sort` (`SortQuery`): Tùy chọn, mặc định là `'created_desc'` (mới nhất xếp trước). Phải nằm trong tập `IsIn` đã định nghĩa.
+### `RolesGuard` (`src/common/guards/roles.guard.ts`)
+Guard này đóng vai trò như một "nhân viên an ninh" thực thụ đứng trước các API.
+- **Luồng Xử Lý & `Reflector`**: 
+  1. Kế thừa `CanActivate` để lấy quyền cho phép/chặn request.
+  2. Sử dụng `Reflector` (công cụ đọc metadata của NestJS) quét qua Context (cả Class và Handler) để tìm xem API này có dán nhãn `ROLES_KEY` nào không.
+  3. Nếu `requiredRoles` trống, nó tự động cho qua (`return true`).
+- **`request.user` đến từ đâu?**: 
+  - `RolesGuard` truy cập `request.user?.role`. Nhưng làm sao `user` lại nằm trong đối tượng `request`?
+  - Thực tế, trong một vòng đời Request của NestJS, **AuthGuard** (thường kiểm tra JWT Token) sẽ chạy *trước* `RolesGuard`. Khi AuthGuard xác thực token thành công, nó sẽ giải mã payload (chứa `id`, `role`,...) và gắn trực tiếp (populate) đối tượng đó vào `request.user`.
+- **Ra quyết định**: 
+  - Nếu request không có thông tin user, hoặc `user.role` không nằm trong danh sách `requiredRoles` (nhãn dán từ Decorator), Guard lập tức ném ra lỗi `ForbiddenException` ("Bạn không có quyền thực hiện thao tác này"), trả về mã HTTP 403.
+  - Nếu hợp lệ, nó trả về `true` cho phép request đi tiếp vào Controller.
 
 ---
 
-## 4. Filters (Trạm Xử Lý Lỗi Toàn Cục)
-**File:** `src/common/filters/all-exceptions.filter.ts`
+## 2. Filters: Lưới Chống "Sập" Và Chuẩn Hóa Lỗi Toàn Cục
 
-Class `AllExceptionsFilter` đóng vai trò "lưới chắn" cuối cùng, hứng tất cả các lỗi (exception) văng ra trong quá trình xử lý request. Ngăn không cho ứng dụng sập và trả lời client một cách lịch sự.
+Trong quá trình ứng dụng chạy, lỗi là điều không thể tránh khỏi (lỗi validate, lỗi database, lỗi logic). Việc bắt và định dạng lại lỗi này được giao cho **`AllExceptionsFilter`** (`src/common/filters/all-exceptions.filter.ts`).
 
-* **Cách hoạt động**:
-  1. Kế thừa `ExceptionFilter` và dùng Decorator `@Catch()` không truyền tham số để bắt **MỌI** loại lỗi.
-  2. Lấy đối tượng `Request` và `Response` của Express.
-  3. **Xác định HTTP Status Code**: Nếu lỗi thuộc về `HttpException` (như 400 Bad Request, 404 Not Found), lấy mã lỗi tương ứng. Nếu lỗi do code sập/lỗi lạ, đặt mã là 500 (`INTERNAL_SERVER_ERROR`).
-  4. **Trích xuất thông báo lỗi (`message`)**: Nếu là `HttpException`, lấy chi tiết mảng/chuỗi lỗi gốc. Nếu là lỗi hệ thống thì dùng câu gốc hoặc báo "Lỗi máy chủ nội bộ".
-  5. **Ghi Log (Dành cho Lập trình viên)**: Dùng `Logger('CrisisManagementTeam')` in ra màn hình terminal chi tiết `đường dẫn`, `phương thức` và đặc biệt là đoạn `stack trace` để dev biết lỗi ở dòng code nào. Không gửi stack trace này cho client để bảo mật.
-  6. **Trả về Client (Chuẩn hóa JSON)**:
-     * `statusCode`: Mã lỗi HTTP.
-     * `timestamp`: Thời gian xảy ra lỗi (chuẩn ISO).
-     * `path`: Đường dẫn API bị lỗi.
-     * `message`: Nếu là lỗi 500, trả về câu báo thân thiện: "Có sự cố xảy ra, chúng tôi đang xử lý. Xin lỗi bạn vì sự bất tiện này!". Nếu không, trả về thông báo lỗi (ví dụ: validation thất bại).
+### Đặc điểm Kỹ Thuật:
+- Sử dụng decorator `@Catch()` không truyền tham số để đóng vai trò làm "Catch-All Filter". Bất kể lỗi gì xảy ra trong hệ thống đều sẽ rơi vào mẻ lưới này.
 
----
-
-## 5. Guards (Lính Gác Bảo Vệ Route)
-**File:** `src/common/guards/roles.guard.ts`
-
-`RolesGuard` là "anh bảo vệ" đứng trước các route API, kiểm tra xem người dùng có quyền (role) hợp lệ để đi tiếp hay không.
-
-* **Cách hoạt động**:
-  1. Class kế thừa `CanActivate` của NestJS. Hàm `canActivate` sẽ trả về `true` (cho qua) hoặc `false` (chặn lại).
-  2. Dùng `Reflector` (công cụ đọc metadata) để quét xem API hiện tại có gắn thẻ `@Roles` (đã định nghĩa ở phần 2) hay không.
-  3. Nếu API không gắn thẻ `@Roles` (`!requiredRoles`), trả về `true` cho qua tự do.
-  4. Lấy đối tượng `user` được đính kèm vào `request` (thường được gắn vào bởi `AuthGuard` chạy trước nó).
-  5. So sánh `user.role` với danh sách quyền yêu cầu. Nếu người dùng không đăng nhập (không có user) hoặc `role` không nằm trong danh sách `requiredRoles`, ném ra lỗi `ForbiddenException` (Mã HTTP 403) với câu thông báo: *"Bạn không có quyền thực hiện thao tác này"*.
+### Cơ Chế Hoạt Động & JSON Format:
+1. **Phân Loại Lỗi:** Filter xác định xem đây là lỗi có chủ đích (`HttpException` như NotFound, BadRequest) hay lỗi máy chủ sập ngoài ý muốn (`Internal Server Error`).
+2. **Che Giấu Thông Tin (Security):**
+   - Với `HttpException`, filter sẽ lấy nội dung thông báo lỗi nguyên bản (ví dụ từ class Validator).
+   - Với lỗi `HttpStatus.INTERNAL_SERVER_ERROR` (500), nó giấu đi lý do lỗi thực sự bằng một câu thông báo thân thiện với người dùng: *"Có sự cố xảy ra, chúng tôi đang xử lý. Xin lỗi bạn vì sự bất tiện này!"*. Điều này giúp tránh rò rỉ các lỗi truy vấn SQL hoặc cấu trúc mã nguồn ra ngoài cho hacker khai thác.
+3. **Logging Chi Tiết Dành Cho Dev:**
+   - Trong khi che giấu lỗi với client, filter dùng `Logger('CrisisManagementTeam')` in thẳng xuống Terminal (console) mọi ngóc ngách của lỗi.
+   - Nó ghi lại: Đường dẫn API lỗi (`request.url`), Phương thức (`request.method`), và đặc biệt là chuỗi **Stack Trace** (lịch sử chuỗi các hàm gọi gây ra lỗi) để lập trình viên có thể fix bug ngay lập tức.
+4. **Cấu Trúc JSON Trả Về Client:** 
+   - Thay vì mỗi lỗi trả về một kiểu khác nhau, nó ép tất cả exception thành một format duy nhất, thân thiện với Frontend:
+   ```json
+   {
+     "statusCode": 403,
+     "timestamp": "2026-05-21T10:00:00.000Z",
+     "path": "/admin/products",
+     "message": "Bạn không có quyền thực hiện thao tác này"
+   }
+   ```
 
 ---
 
-## 6. Interfaces (Giao Diện Chuẩn Dữ Liệu)
-**File:** `src/common/interfaces/api-response.interface.ts`
+## 3. Utils & Interfaces: Thống Nhất Giao Tiếp Backend - Frontend
 
-Quy định cấu trúc chung (Schema) của toàn bộ dữ liệu trả về cho frontend, để frontend dễ dàng phân tích và xử lý chung.
+Trong các file `src/common/interfaces/api-response.interface.ts` và `src/common/utils/api-response.util.ts`, hệ thống định nghĩa các công cụ bọc dữ liệu (Wrapper).
 
-* **`ApiResponse<T>`**: Phản hồi API cơ bản.
-  * `success` (boolean): Thành công là `true`.
-  * `data` (T): Dữ liệu chứa bên trong, có kiểu tổng quát `T`.
-* **`PaginatedMeta`**: Siêu dữ liệu dùng cho phân trang.
-  * `total` (number): Tổng số item thỏa mãn điều kiện tìm kiếm.
-  * `page` (number): Trang hiện tại.
-  * `limit` (number): Số lượng item trên một trang.
-  * `totalPages` (number): Tổng số trang.
-* **`PaginatedApiResponse<T>`**: Phản hồi API danh sách có phân trang.
-  * `success` (boolean): Bằng `true`.
-  * `data` (`T[]`): Mảng dữ liệu.
-  * `meta` (`PaginatedMeta`): Các thông số phục vụ vẽ giao diện phân trang.
+### Tại sao lại cần nó?
+Nếu một API trả về Array mảng sản phẩm `[]`, API khác trả về đối tượng `{ id, name }`, Frontend sẽ rất chật vật trong việc viết hàm bắt dữ liệu (fetch interceptor). Do đó, ứng dụng ép **mọi API trả về thành công đều phải tuân theo 1 trong 2 Interface chuẩn**.
 
----
+### `ApiResponse` & Hàm `success()`
+- Giao diện `ApiResponse<T>` đảm bảo luôn luôn có một cờ `success: boolean` và dữ liệu thực sự sẽ nằm trọn trong thuộc tính `data`.
+- Hàm helper `success(data)` giúp các Controller bọc kết quả nhanh chóng thay vì phải tự viết JSON:
+  ```typescript
+  // Thay vì return user;
+  return success(user); // Output: { success: true, data: { id: 1, ... } }
+  ```
 
-## 7. Utils (Hàm Tiện Ích Trợ Giúp)
-**File:** `src/common/utils/api-response.util.ts`
+### `PaginatedApiResponse` & Hàm `paginated()`
+- Giao diện `PaginatedApiResponse<T>` cung cấp thêm cục dữ liệu `meta` (`PaginatedMeta`) chứa toàn bộ các thông số để Frontend có thể dễ dàng vẽ thanh chuyển trang (Pagination Component).
+- Hàm helper `paginated(data, total, page, limit)` không chỉ bọc dữ liệu mà còn thông minh thực hiện luôn phép toán phân trang.
+- **Tính toán `totalPages`:** Dùng thuật toán `Math.ceil(total / limit)`. Ví dụ: Có tổng cộng 25 sản phẩm (`total=25`), chia làm 10 sản phẩm mỗi trang (`limit=10`). Phép chia `25/10 = 2.5`, hàm `Math.ceil()` làm tròn lên thành `3`. Frontend sẽ biết để vẽ chính xác 3 nút trang! Nếu `total = 0`, hàm có cơ chế an toàn trả ngay về `0`. 
 
-Chứa các hàm tạo sẵn (Helper/Factory function) để bọc dữ liệu vào chuẩn Response Interface ở trên thay vì tạo thủ công bằng tay.
-
-* **Hàm `success<T>(data: T): ApiResponse<T>`**
-  * **Input**: Dữ liệu thô (ví dụ: object user, danh sách giỏ hàng...).
-  * **Output**: Trả về cấu trúc JSON thống nhất `{ success: true, data: [dữ liệu thô] }`.
-* **Hàm `paginated<T>(data: T[], total: number, page: number, limit: number): PaginatedApiResponse<T>`**
-  * **Input**: Mảng dữ liệu hiện tại, tổng toàn bộ record, số trang hiện tại, kích thước trang.
-  * **Output**: Trả về JSON bao gồm `success: true`, `data`, và tự động tính toán ra block `meta`.
-  * **Logic tính `totalPages`**: Sử dụng công thức `Math.ceil(total / limit)`. Nếu `total` bằng `0` thì trả về `0` trang. 
-
---- 
-**Tóm lược:** Nhờ có module `common` này, lập trình viên không phải quan tâm đến việc tạo JSON format chuẩn, không phải viết lại code phân quyền, hay xử lý lỗi chung chung nữa. Họ chỉ việc tập trung vào logic cốt lõi. Cấu trúc chuẩn hóa sẽ giúp dự án dễ mở rộng, code dễ đọc hơn!
+Tóm lại, **`src/common`** đóng vai trò là "bộ quy tắc thép" của ứng dụng, giúp hệ thống ổn định, an toàn và dễ dàng mở rộng, đồng thời mang lại sự "hạnh phúc" cho Frontend khi tích hợp API.

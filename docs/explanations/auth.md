@@ -1,105 +1,90 @@
-# Giải Thích Chi Tiết - Module Auth (`src/auth`)
+# Phân Tích Chuyên Sâu Cấu Trúc và Tương Tác: Module Auth (`src/auth`)
 
-Module `auth` chịu trách nhiệm xử lý toàn bộ các nghiệp vụ liên quan đến xác thực (Authentication), cấp phép (Authorization cơ bản), và bảo mật hệ thống. Module này sử dụng **JWT (JSON Web Token)** để quản lý phiên đăng nhập và bảo vệ token bằng cơ chế **HttpOnly Cookies**.
-
-Dưới đây là chi tiết phân tích từng thành phần trong thư mục `src/auth/`.
+Tài liệu này cung cấp một cái nhìn chuyên sâu (deep dive) vào cách thức hoạt động của module Xác thực (Auth) trong dự án. Trọng tâm của bài phân tích là sự tương tác chặt chẽ giữa Controller và Service, dòng chảy và cách xử lý dữ liệu trả về, cũng như vai trò cốt lõi của các thư viện mã nguồn mở bên thứ ba.
 
 ---
 
-## 1. Controller (`auth.controller.ts`)
+## 1. Controller (`src/auth/auth.controller.ts`)
 
-Controller này định nghĩa các RESTful API endpoints, là nơi tiếp nhận các yêu cầu (requests) từ client. Controller sử dụng `@UseInterceptors(ClassSerializerInterceptor)` kết hợp với `@SerializeOptions` để tự động lọc bỏ các dữ liệu nhạy cảm (như mật khẩu) trước khi trả về cho client.
+`AuthController` là cửa ngõ giao tiếp của ứng dụng. Nhiệm vụ của nó là tiếp nhận các yêu cầu HTTP, áp dụng các lớp bảo vệ/chuyển đổi, và gọi đến các phương thức tương ứng trong Service. Điểm nhấn ở đây là việc sử dụng các Decorators tinh vi của NestJS để giữ cho mã nguồn gọn gàng.
 
-### 1.1. Đăng Ký - `POST /auth/register`
-- **Chức năng**: Tạo tài khoản người dùng mới.
-- **Dữ liệu đầu vào (Body)**: Sử dụng `RegisterDto`.
-  - `email` (string): Phải đúng định dạng email, không được để trống.
-  - `password` (string): Mật khẩu, ít nhất 6 ký tự.
-  - `name` (string): Tên người dùng.
-- **Dữ liệu trả về**: Trả về `AuthResponseDto` bao gồm `success: true` và `message: "Đăng ký thành công!"`.
+### 1.1. Giải Mã Các Decorators Trọng Yếu
 
-### 1.2. Đăng Nhập - `POST /auth/login`
-- **Chức năng**: Xác thực thông tin người dùng và cấp phát Token.
-- **Dữ liệu đầu vào (Body)**: Sử dụng `LoginDto`.
-  - `email` (string): Bắt buộc, đúng định dạng email.
-  - `password` (string): Bắt buộc, ít nhất 6 ký tự.
-- **Xử lý đặc biệt**: Sử dụng `@Res({ passthrough: true })` để lấy đối tượng Response của Express nhằm cài đặt Cookie trực tiếp mà không phá vỡ luồng trả về (return) của NestJS.
-- **Dữ liệu trả về**: Trả về `AuthResponseDto` bao gồm `success: true`, chuỗi `accessToken`, và thông tin `user` (`UserResponseDto` gồm: `id`, `email`, `name`, `role`). Các trường `password` và `refreshToken` bị loại bỏ (nhờ `@Exclude()` trong DTO).
-- **Side Effect**: Thiết lập 2 Cookies (`access_token` và `refresh_token`) vào trình duyệt.
+- **`@UseInterceptors(ClassSerializerInterceptor)` & `@SerializeOptions`**:
+  - **Mục đích**: Tự động hóa quá trình "làm sạch" dữ liệu (loại bỏ các thông tin nhạy cảm) trước khi phản hồi về cho người dùng.
+  - **Cách hoạt động**: Khi một hàm trong Controller (`login`, `register`, `me`) trả về một class instance, `ClassSerializerInterceptor` sẽ can thiệp trước khi dữ liệu được chuyển thành JSON. Decorator `@SerializeOptions({ type: AuthResponseDto })` ép kiểu cho đối tượng đầu ra, yêu cầu nó phải tuân thủ nghiêm ngặt cấu trúc của `AuthResponseDto`. Interceptor sẽ kích hoạt `class-transformer` để đọc các siêu dữ liệu (metadata) trên DTO, cụ thể là tìm các thuộc tính bị gắn `@Exclude()` (như `password` và `refreshToken` trong `UserResponseDto`) và xóa bỏ chúng hoàn toàn khỏi payload cuối cùng.
+  - **Tại sao cần thiết?**: Tránh rò rỉ dữ liệu (Data Leakage). Ngay cả khi lập trình viên bất cẩn `select *` từ Database, lớp vỏ Controller vẫn đóng vai trò gác cổng cuối cùng.
 
-### 1.3. Cấp Lại Token - `POST /auth/refresh`
-- **Chức năng**: Tạo mới bộ Access Token và Refresh Token khi Access Token cũ (15 phút) hết hạn.
-- **Dữ liệu đầu vào**: Không cần Body. Lấy `refresh_token` từ Cookies của Request (`request.cookies['refresh_token']`).
-- **Dữ liệu trả về**: `AuthResponseDto` với `success: true`.
-- **Side Effect**: Thay thế (set lại) Cookies `access_token` và `refresh_token` bằng token mới.
+- **`@Res({ passthrough: true }) response: Response`**:
+  - **Mục đích**: Cấp quyền thao tác trực tiếp với đối tượng HTTP Response của Express (như set Cookie) nhưng **không** phá vỡ quy trình xử lý phản hồi (response handling) tự động của NestJS.
+  - **Cách hoạt động**: Mặc định, nếu bạn tiêm đối tượng `@Res()` vào một handler, NestJS hiểu rằng bạn muốn tự mình quản lý việc gửi phản hồi (ví dụ: dùng `response.json(...)`). Khi thêm thuộc tính `passthrough: true`, bạn nói với NestJS: *"Tôi chỉ mượn đối tượng này để thiết lập Header hoặc Cookie (`response.cookie(...)`), phần còn lại hãy cứ xử lý `return` statement như bình thường"*. Điều này là bắt buộc để ứng dụng có thể vừa thiết lập HttpOnly Cookie, vừa trả về JSON Body (`AuthResponseDto`) cùng một lúc.
 
-### 1.4. Đăng Xuất - `POST /auth/logout`
-- **Chức năng**: Xóa phiên đăng nhập.
-- **Dữ liệu đầu vào**: Lấy `access_token` từ Cookies để xác định user nào đang yêu cầu đăng xuất.
-- **Dữ liệu trả về**: `AuthResponseDto` với `success: true`.
-- **Side Effect**: Xóa Cookies `access_token` và `refresh_token` trên trình duyệt (`response.clearCookie`), đồng thời xóa (null) refreshToken của user đó dưới Database.
-
-### 1.5. Lấy Thông Tin Bản Thân - `GET /auth/me`
-- **Chức năng**: Lấy thông tin tài khoản đang đăng nhập.
-- **Bảo mật**: Endpoints này được bảo vệ bởi `@UseGuards(AuthGuard)`. Người dùng bắt buộc phải có `access_token` hợp lệ trong Cookie.
-- **Dữ liệu đầu vào**: Lấy `request.user` (chứa `JwtPayloadDto` do `AuthGuard` gắn vào).
-- **Dữ liệu trả về**: `UserResponseDto` (id, email, name, role).
+- **`@UseGuards(AuthGuard)`**:
+  - **Mục đích**: Bảo vệ endpoint (ví dụ: `GET /auth/me`), đảm bảo chỉ những yêu cầu đã được xác thực mới đi qua được.
+  - **Cách hoạt động**: `AuthGuard` trích xuất `access_token` từ request cookies, giải mã JWT, kiểm tra tính hợp lệ và thời gian sống. Nếu thành công, nó gắn payload đã giải mã vào `request.user`. Từ đó, Controller có thể an tâm truy cập thông qua `@Req() request: Request & { user: JwtPayloadDto }`.
 
 ---
 
-## 2. Service (`auth.service.ts`)
+## 2. Service (`src/auth/auth.service.ts`)
 
-Đây là nơi chứa toàn bộ logic xử lý nghiệp vụ (Business Logic). Nó tương tác với `UserService` để lấy dữ liệu từ Database.
+`AuthService` là trái tim của hệ thống Auth. Nó chứa toàn bộ logic xử lý, từ việc băm mật khẩu, so sánh dữ liệu, cho đến thao tác sinh token và thiết lập cookies, bằng cách gọi qua `UserService`.
 
-### 2.1. Logic Đăng Ký (`register`)
-1. **Kiểm tra tồn tại**: Gọi `userService.findByEmail(data.email)`. Nếu đã tồn tại, ném lỗi `ConflictException` (Email đã được sử dụng).
-2. **Bảo mật mật khẩu**: Sử dụng `bcrypt.hash(data.password, 10)` để băm (hash) mật khẩu. Mật khẩu thô không bao giờ được lưu vào CSDL.
-3. **Lưu CSDL**: Gọi `userService.create` để tạo user với mật khẩu đã băm.
+### 2.1. Các Phương Thức Public (Luồng Nghiệp Vụ Chính)
 
-### 2.2. Logic Đăng Nhập (`login`)
-1. **Tìm người dùng**: Tìm user qua email bằng `userService.findByEmail`.
-2. **Xác thực**: Kiểm tra user có tồn tại và dùng `bcrypt.compare` để so sánh mật khẩu đầu vào với mật khẩu đã băm. Nếu sai, ném `UnauthorizedException` (Email hoặc mật khẩu không đúng).
-3. **Tạo Token**: Gọi hàm `generateTokens` để tạo Access Token và Refresh Token.
-4. **Lưu Refresh Token**: Gọi `updateRefreshToken` để *băm* Refresh Token và lưu vào CSDL.
-5. **Gắn Cookies**: Gọi `setCookies` để đưa token vào Response.
+- **`register(data: RegisterDto)`**:
+  - Kiểm tra email tồn tại trong Database. Nếu có, từ chối với `ConflictException`.
+  - Thực hiện mã hóa (băm) mật khẩu người dùng truyền lên.
+  - Giao cho `UserService` lưu vào CSDL và trả về thông báo thành công.
 
-### 2.3. Logic Cấp Lại Token (`handleRefresh`)
-1. **Kiểm tra đầu vào**: Nếu không có `refreshToken`, ném `UnauthorizedException`.
-2. **Xác minh JWT**: Dùng `jwt.verify` với `JWT_REFRESH_SECRET`. Nếu lỗi hoặc hết hạn (`TokenExpiredError`), ném lỗi `UnauthorizedException`.
-3. **Đối chiếu Database**: Tìm user theo `userId` (từ payload). Sau đó tiếp tục dùng `bcrypt.compare` để đối chiếu Refresh Token (do client gửi lên) với Refresh Token (đã băm) lưu trong Database. Nếu không khớp hoặc user đã bị vô hiệu hóa refresh token (bằng null), từ chối ngay lập tức. Tính năng này chặn đứng việc sử dụng lại token đã bị đánh cắp (Token Reuse).
-4. **Cấp phát lại**: Tạo token mới, cập nhật hash vào DB, và set Cookies mới.
+- **`login(data: LoginDto, response: Response)`**:
+  - Tìm kiếm người dùng bằng email.
+  - Gọi thư viện `bcrypt` để so sánh mật khẩu gốc với mã băm lưu trong DB. Nếu sai, lập tức ném lỗi `UnauthorizedException`.
+  - **Phối hợp làm việc**: Sau khi xác thực thành công, hàm sẽ gọi `generateTokens` để sinh cặp mã mới, sau đó gọi `updateRefreshToken` để lưu Refresh Token (đã băm) vào DB, và cuối cùng gọi `setCookies` (truyền đối tượng `response` nhận từ Controller xuống) để đưa Token vào trình duyệt.
+  - Trả về `AuthResponseDto` báo cáo thành công.
 
-### 2.4. Logic Đăng Xuất (`handleLogout` & `logout`)
-- Dùng `validateAccessToken` để trích xuất `userId` (ngay cả khi Access Token có thể đã hết hạn nhưng ta vẫn lấy được payload nếu format đúng).
-- Gọi hàm `logout(userId)` để thực thi lệnh `userService.update(userId, { refreshToken: null })`. Việc set `refreshToken = null` trong DB đồng nghĩa với việc mọi Refresh Token cũ của user này ngay lập tức bị vô hiệu hóa, không thể sinh thêm Access Token mới nữa.
-- Gọi `clearCookie` với cùng option cấu hình để trình duyệt xóa cookies.
+- **`handleRefresh(refreshToken, response)`**:
+  - Xác nhận có `refreshToken`. Dùng JWT giải mã và kiểm tra hạn sử dụng.
+  - Lấy người dùng ra từ Database và kiểm tra xem `refreshToken` gửi lên có khớp với mã băm lưu ở DB hay không. Đây là cơ chế chống đánh cắp token (Token Hijacking/Reuse) - nếu token trên DB bị xóa hoặc thay đổi, các token cũ bị rò rỉ sẽ mất hiệu lực.
+  - Nếu hợp lệ, hệ thống lại tiếp tục chu trình: sinh token mới (`generateTokens`), cập nhật DB (`updateRefreshToken`) và gắn lại Cookie (`setCookies`).
 
-### 2.5. Cơ Chế Tạo và Gắn Token
-- **`generateTokens`**: Sử dụng `jsonwebtoken` sinh 2 token:
-  - `accessToken`: Hết hạn trong `15m` (15 phút). Dùng cho các Request thông thường.
-  - `refreshToken`: Hết hạn trong `7d` (7 ngày). Chỉ dùng ở endpoint `/refresh`.
-- **`setCookies`**: Thiết lập bảo mật cho Cookies:
-  - `httpOnly: true`: Hoàn toàn cách ly Cookie khỏi môi trường Javascript (`document.cookie`), phòng chống tối đa tấn công XSS.
-  - `secure: isProduction`: Trên môi trường thật (Production), Cookie chỉ được truyền tải qua giao thức HTTPS có mã hóa.
-  - `sameSite: 'lax'`: Ngăn chặn tấn công CSRF bằng cách hạn chế gửi Cookie qua các tên miền chéo.
+- **`handleLogout(accessToken, response)`**:
+  - Xác định người dùng thông qua `accessToken` (kể cả khi đã hết hạn, hệ thống chỉ cần bắt lấy ID).
+  - Cập nhật trường `refreshToken` của user trong DB thành `null` (Xóa bỏ khả năng tạo mới token).
+  - Sử dụng lệnh `response.clearCookie('access_token', options)` và `response.clearCookie('refresh_token', options)` để gỡ bỏ hoàn toàn trạng thái phiên lưu trên trình duyệt của người dùng.
+
+### 2.2. Các Phương Thức Private (Helpers)
+
+Việc chia nhỏ các thao tác thành hàm `private` giúp logic chính rõ ràng, tránh trùng lặp và tăng tính bảo trì:
+- **`generateTokens(userId, email, role)`**: Tập trung duy nhất vào cấu hình `jsonwebtoken` để sinh `accessToken` và `refreshToken` với thời hạn (TTL) và Secret Key tương ứng.
+- **`updateRefreshToken(userId, refreshToken)`**: Không lưu plain-text. Nó tự động gọi `bcrypt.hash` trước khi yêu cầu `UserService` lưu Refresh Token.
+- **`setCookies(response, tokens)`**: Tập trung các quy tắc bảo mật Cookie: cấu hình cờ `httpOnly: true`, `secure: isProduction`, `sameSite: 'lax'` và thiết lập `maxAge` phù hợp cho từng loại.
 
 ---
 
-## 3. Data Transfer Objects (DTOs)
+## 3. Theo Dấu Dữ Liệu Trả Về (Returns & Outputs Trace)
 
-Nằm trong thư mục `src/auth/dto/`, các class này định nghĩa cấu trúc dữ liệu và các quy tắc kiểm tra (Validation):
-- Sử dụng `class-validator` (như `@IsEmail()`, `@IsNotEmpty()`, `@MinLength()`, `@IsInt()`) để kiểm tra dữ liệu đầu vào.
-- **Ẩn dữ liệu nhạy cảm**: Trong `UserResponseDto`, các trường `password` và `refreshToken` được đánh dấu `@Exclude()`. Khi dữ liệu đi qua `ClassSerializerInterceptor` ở Controller, các trường này sẽ bị gỡ bỏ trước khi chuyển thành JSON trả về cho frontend.
-- **`JwtPayloadDto`**: Định nghĩa chuẩn cấu trúc giấu trong Token gồm: `userId`, `email`, và `role`.
+Để hiểu rõ ứng dụng hoạt động thế nào, ta cần theo dõi cách Token và DTO được luân chuyển từ Service ra đến ngoài Client:
+
+1. **Khởi nguồn Token**: Ở tầng Service, `accessToken` và `refreshToken` ra đời tại `generateTokens()`.
+2. **Thiết lập ở Cookie**: Hàm `setCookies()` âm thầm "nhét" cả hai thẻ này vào vùng Header `Set-Cookie` của HTTP Response. Trình duyệt khi nhận được sẽ tự động lưu lại thành **HttpOnly Cookies** – đồng nghĩa với việc mã Javascript của frontend (React/Vue/...) hoàn toàn không thể chạm tới chúng, phòng chống tuyệt đối tấn công **XSS** nhắm vào Token.
+3. **Giá trị trả về (Body)**: Lệnh `return new AuthResponseDto(...)` trong hàm `login()` gửi về một cấu trúc định sẵn. Đáng chú ý, `accessToken` (để hỗ trợ một số Client đặc thù không dùng Cookie) được đính kèm vào Body (`{ success: true, accessToken: '...' }`), nhưng `refreshToken` thì **tuyệt đối không**.
+4. **Lọc dữ liệu (Serialization)**: Khối `UserResponseDto` nằm bên trong cấu trúc trả về đi qua `ClassSerializerInterceptor`. Nhờ nhãn `@Exclude()` trên biến `password` và `refreshToken`, NestJS sẽ mạnh tay cắt bỏ hai trường này trước khi mã hóa thành chuỗi JSON cuối cùng gửi về Client. Kết quả là một JSON sạch sẽ, an toàn.
 
 ---
 
-## 4. Bảo Vệ Tuyến Phố (Guard) - `auth.guard.ts`
+## 4. Vai Trò Cốt Lõi Của Các Thư Viện Bên Thứ Ba
 
-`AuthGuard` đóng vai trò người gác cổng cho các API cần đăng nhập (ví dụ: `GET /auth/me`).
-- **Luồng hoạt động**:
-  1. Can thiệp vào request chuẩn bị vào Controller thông qua `ExecutionContext`.
-  2. Rút trích thẻ: `request.cookies['access_token']`. Nếu không có, ném lỗi 401 (Bạn cần đăng nhập).
-  3. Xác thực thẻ: Gọi `authService.validateAccessToken()`. Quá trình này dùng secret key giải mã. Nếu token giả mạo, sai chữ ký, hoặc đã hết thời gian 15 phút, sẽ ném lỗi 401.
-  4. Pass: Nếu token hoàn toàn hợp lệ, thông tin giải mã (Payload) sẽ được gắn vào `request.user`.
-- Nhờ cơ chế này, bất kỳ Controller nào phía sau cũng có thể gọi `@Req() request` để dễ dàng lấy ra thông tin `request.user.userId` hay `request.user.role` mà không phải lặp lại logic giải mã Token.
+Hệ thống Auth không thể vững chắc nếu thiếu đi sự hỗ trợ từ các công cụ chuyên dụng:
+
+### 4.1. `bcryptjs` (Mã hóa một chiều)
+- **Vai trò**: Đảm bảo an toàn cho dữ liệu nhạy cảm nhất (Mật khẩu và Refresh Token). Ngay cả khi Database bị đánh cắp, Hacker cũng không thể lấy được mật khẩu thật do cơ chế mã hóa một chiều.
+- **Salt rounds = 10**: Là "chi phí tính toán" (cost factor) cho thuật toán băm. Con số 10 buộc CPU của máy chủ phải thực hiện phép toán chậm đi một cách có chủ đích (khoảng 100ms trên máy chủ thông thường). Điều này khiến các cuộc tấn công quét mật khẩu theo từ điển (Brute-force/Rainbow Table) mất hàng trăm năm để phá giải. 10 là mức cân bằng hoàn hảo giữa hiệu suất server và độ bảo mật.
+
+### 4.2. `jsonwebtoken` (Cơ chế Token)
+- **Vai trò**: Tạo (sign) và xác thực (verify) thẻ thông hành chuẩn RFC 7519, giúp hệ thống biết ai đang truy cập mà không cần lưu giữ phiên đăng nhập (Stateless Session) ở bộ nhớ.
+- **Secret Keys**: Sử dụng hai chìa khóa độc lập `JWT_ACCESS_SECRET` và `JWT_REFRESH_SECRET`. Nếu chìa khóa truy cập tạm thời (Access Key) bị lộ, hacker không thể tự sinh Refresh Token để chiếm phiên vĩnh viễn.
+- **TTLs (Time-To-Live)**: `accessToken` có vòng đời cực ngắn (15 phút), thu hẹp tối đa thời gian Hacker có thể lợi dụng nếu token này bị bắt gói tin. Tuy nhiên, để UX tốt, `refreshToken` có tuổi thọ lớn hơn (7 ngày), đóng vai trò "chìa khóa chính" được bảo vệ cực kỳ nghiêm ngặt qua DB (so khớp băm) và HttpOnly Cookies.
+
+### 4.3. `class-transformer` & `class-validator` (Lá chắn dữ liệu)
+- **`class-validator`**: Trú ngụ ở tầng DTO (Ví dụ: `@IsEmail()`, `@IsString()`). Đây là lớp phòng thủ đầu tiên cản bước các cuộc tấn công chèn mã độc dạng SQL Injection hay NoSQL Injection bằng cách đảm bảo dữ liệu đầu vào chuẩn hóa ngay trước khi vào Controller.
+- **`class-transformer`**: Cung cấp `@Exclude()`. Đây là chốt chặn bảo mật cuối cùng ở tầng Presentation, gạt bỏ khả năng nhà phát triển vô tình làm lộ thông tin mật vì những lệnh ánh xạ (mapping) sơ suất.

@@ -1,95 +1,119 @@
-# Giải Thích Chi Tiết - Module Orders (`src/orders`)
+# Giải thích chi tiết Module Orders
 
-Module Orders là trái tim của sàn thương mại điện tử, xử lý bước quan trọng nhất: **Thanh toán (Checkout)** và **Quản lý Đơn Hàng**. Nơi này cực kỳ nhạy cảm, sai một dòng code có thể dẫn đến thất thoát tiền hoặc bán lố số lượng hàng trong kho.
+Tài liệu này cung cấp một cái nhìn sâu sắc (deep dive) vào sự tương tác giữa Controller và Service trong module `orders` của hệ thống. Nó sẽ đi sâu vào cách các endpoint hoạt động, cách chúng giao tiếp với service, cách xử lý transaction an toàn với cơ sở dữ liệu và cách định dạng dữ liệu trả về cho client.
 
-## 1. Cấu trúc Module (`orders.module.ts`)
-- **Imports:** `AuthModule` (để bảo vệ các endpoint bằng Guard).
-- **Controllers:** `OrdersController` (Định tuyến yêu cầu liên quan đến đơn hàng).
-- **Providers:** `OrdersService` (Xử lý nghiệp vụ chính).
-- **Exports:** `OrdersService` (Cho phép module khác sử dụng nếu cần).
+## 1. Controllers (Bộ điều khiển)
 
-## 2. Controller (`orders.controller.ts`)
-Tất cả endpoints trong controller này đều yêu cầu xác thực thông qua `@UseGuards(AuthGuard)`. Tiền tố URL chung là `/orders`.
+File `src/orders/orders.controller.ts` đóng vai trò là cửa ngõ nhận các HTTP request liên quan đến đơn hàng, xử lý kiểm tra bảo mật ban đầu và chuyển tiếp dữ liệu đến Service.
 
-### 2.1. Thanh toán (`POST /orders/checkout`)
-- **Mục đích:** Xử lý giỏ hàng hiện tại của người dùng, thanh toán và tạo đơn hàng.
-- **Inputs (Đầu vào):**
-  - **Request user (`request.user`):** Lấy `userId` từ payload của JWT.
-  - **Body (`CheckoutDto`):**
-    - `address` (string): Địa chỉ giao hàng. Yêu cầu không rỗng (`@IsNotEmpty()`) và có độ dài tối thiểu 10 ký tự (`@MinLength(10)`).
-- **Service được gọi:** `ordersService.checkout(request.user.userId, dto)`.
-- **Output (Đầu ra):** Dữ liệu đơn hàng định dạng `OrderResponse` bọc trong `success()`.
+### Các Endpoints
 
-### 2.2. Lấy danh sách đơn hàng (`GET /orders`)
-- **Mục đích:** Lấy toàn bộ lịch sử mua hàng của người dùng hiện tại.
-- **Inputs:**
-  - **Request user (`request.user`):** Lấy `userId`.
-- **Service được gọi:** `ordersService.findOrders(request.user.userId)`.
-- **Output:** Mảng `OrderResponse` bọc trong `success()`.
+Controller này định nghĩa ba endpoint chính:
+- `POST /orders/checkout`: Tạo đơn hàng mới từ giỏ hàng hiện tại (thanh toán).
+- `GET /orders`: Lấy danh sách tất cả các đơn hàng của user.
+- `GET /orders/:id`: Lấy chi tiết một đơn hàng cụ thể.
 
-### 2.3. Lấy chi tiết đơn hàng (`GET /orders/:id`)
-- **Mục đích:** Xem chi tiết một đơn hàng cụ thể của người dùng.
-- **Inputs:**
-  - **Request user (`request.user`):** Lấy `userId`.
-  - **Param `id`:** ID của đơn hàng (được ép kiểu sang số qua `ParseIntPipe`).
-- **Service được gọi:** `ordersService.findOrderById(request.user.userId, id)`.
-- **Output:** Dữ liệu đơn hàng `OrderResponse` bọc trong `success()`.
+### Decorators và Trích xuất Dữ liệu
 
----
+- **`@UseGuards(AuthGuard)`**: Toàn bộ controller được bảo vệ bởi `AuthGuard`. Điều này đảm bảo chỉ những user đã xác thực (có JWT hợp lệ) mới có thể truy cập các endpoint này. Guard này sẽ phân tích token và gắn thông tin payload vào object `request.user`.
+- **Trích xuất `userId`**: Trong mỗi phương thức, chúng ta thấy cách tiếp cận: `@Req() request: Request & { user: JwtPayloadDto }`. Express Request object được mở rộng type để bao gồm thuộc tính `user` (được thêm vào bởi `AuthGuard`). Từ đây, `request.user.userId` được lấy ra và truyền an toàn cho Service. Cách này đảm bảo user chỉ có thể thao tác với đơn hàng của chính họ và không thể xem/sửa đơn hàng của người khác.
+- **`@Param('id', ParseIntPipe)`**: Được sử dụng trong endpoint `GET /orders/:id`.
+  - `@Param('id')` lấy giá trị `id` từ URL (ví dụ: đường dẫn `/orders/123` thì `id` là `"123"`).
+  - `ParseIntPipe` là một NestJS pipe tích hợp sẵn. Nó có hai tác dụng: **Biến đổi** (chuyển chuỗi `"123"` thành số `123`) và **Xác thực** (nếu `id` truyền vào không phải là số hợp lệ, nó sẽ tự động ném ra lỗi `400 Bad Request` trước khi request kịp chạm tới logic bên trong hàm).
 
-## 3. Service (`orders.service.ts`)
-Service chứa toàn bộ logic nghiệp vụ cốt lõi. Quá trình thanh toán đặc biệt quan trọng và được bọc trong database transaction để đảm bảo toàn vẹn dữ liệu.
+## 2. Services (Lớp Logic Nghiệp Vụ)
 
-### 3.1. Kiểu dữ liệu trả về (`OrderResponse`)
-Chuẩn hóa dữ liệu trả về từ database để giấu đi các trường không cần thiết và chuyển kiểu `Decimal` thành `String` an toàn cho JSON:
-- `id` (number)
-- `status` (OrderStatus)
-- `total` (string)
-- `address` (string)
-- `createdAt` (Date)
-- `updatedAt` (Date)
-- `items`: Mảng chi tiết sản phẩm gồm: `id`, `productId`, `productName`, `productPrice` (string), `quantity`, `subtotal` (string).
+File `src/orders/orders.service.ts` chứa toàn bộ logic kinh doanh (business logic) cốt lõi của module orders.
 
-### 3.2. Hàm `checkout(userId: number, dto: CheckoutDto)`
-Đây là hàm phức tạp nhất. Nó được đặt trong một khối **Database Transaction** (`this.prisma.$transaction`).
-**Tại sao phải dùng `$transaction`?** 
-Khi thanh toán, hệ thống thực hiện nhiều bước (tạo đơn, tạo item, trừ kho, đóng giỏ hàng). Nếu có lỗi giữa chừng (ví dụ: kho hết hàng ở sản phẩm cuối cùng), toàn bộ các thao tác trước đó phải tự động được Rollback (hủy bỏ) như chưa từng xảy ra.
+### Deep dive: Phương thức `checkout`
 
-**Luồng dữ liệu (Data flow) & Bắt lỗi (Error Handling):**
-1. **Lấy giỏ hàng (Cart):**
-   - Tìm giỏ hàng có trạng thái `ACTIVE` của người dùng. Include cả `items` và chi tiết `product`.
-   - *Error Handling:* Nếu giỏ không tồn tại hoặc `items.length === 0` $\rightarrow$ Ném `BadRequestException('Giỏ hàng trống')`.
-2. **Kiểm tra tính hợp lệ của sản phẩm:**
-   - Lặp qua từng `item` trong giỏ hàng:
-     - Nếu sản phẩm bị ẩn/khóa (`status !== ACTIVE`) hoặc đã bị xóa (`deletedAt` có giá trị) $\rightarrow$ Ném `BadRequestException('Sản phẩm không còn bán')`.
-     - Nếu tồn kho thực tế nhỏ hơn số lượng trong giỏ (`stock < quantity`) $\rightarrow$ Ném `BadRequestException('Sản phẩm không đủ hàng')`.
-3. **Chuẩn bị dữ liệu Đơn hàng:**
-   - Map danh sách giỏ hàng thành `orderItemsData` (gồm productId, productName, productPrice, quantity, subtotal).
-   - *Subtotal* được tính bằng `product.price.mul(quantity)`.
-   - Tính tổng tiền của đơn hàng (`total`) bằng cách cộng dồn các subtotal bằng kiểu `Prisma.Decimal`.
-4. **Tạo mới Đơn hàng (Order):**
-   - Lưu bản ghi vào bảng `Order` với trạng thái `PENDING`, tổng tiền, địa chỉ giao hàng (`dto.address`). Đồng thời tạo các `items` thông qua nested relation.
-5. **Trừ Tồn kho (Cực kỳ quan trọng - Optimistic Locking):**
-   - Với mỗi sản phẩm, thực hiện `tx.product.updateMany`.
-   - *Điều kiện (Where):* ID khớp, trạng thái `ACTIVE`, không bị xóa, và đặc biệt: `stock: { gte: item.quantity }` (Chỉ update nếu tồn kho $\ge$ lượng mua).
-   - *Hành động (Data):* `stock: { decrement: item.quantity }` (Trừ đi lượng mua).
-   - *Error Handling:* Nếu `updated.count !== 1` (do ai đó mua tranh dẫn đến không thỏa mãn điều kiện `gte`) $\rightarrow$ Ném `BadRequestException('${item.product.name} không đủ hàng')`. Đây là kỹ thuật giúp tránh Race Condition (lỗi âm kho).
-6. **Đóng Giỏ hàng:**
-   - Cập nhật trạng thái giỏ hàng hiện tại thành `COMPLETED`.
-7. **Trả về kết quả:**
-   - Log giao dịch thành công. Gọi hàm `serializeOrder` để định dạng lại trước khi trả cho controller.
-   - Nếu có exception, log lỗi ở dạng warning và đẩy lỗi ra cho cơ chế filter của NestJS xử lý.
+Phương thức `checkout` là trái tim của module này, xử lý quá trình chuyển đổi một giỏ hàng thành đơn hàng. Nó bao gồm nhiều bước phức tạp và phải đảm bảo tính toàn vẹn dữ liệu (ACID).
 
-### 3.3. Hàm `findOrders(userId: number)`
-- **Mục đích:** Lấy lịch sử tất cả các đơn hàng.
-- **Logic:** Query bảng `Order` dựa vào `userId`, sắp xếp theo thứ tự `createdAt: 'desc'` (mới nhất lên đầu). Kèm theo thông tin `items`.
-- **Trả về:** Mảng các đơn hàng đã được format qua `serializeOrder`.
+1. **Lấy Giỏ hàng & Kiểm tra (Validation)**:
+   - Tìm giỏ hàng đang ở trạng thái `ACTIVE` của user kèm theo các sản phẩm bên trong.
+   - Ném lỗi `BadRequestException` nếu giỏ hàng trống, sản phẩm không còn bán (trạng thái khác `ACTIVE` hoặc đã bị xóa mềm `deletedAt`), hoặc số lượng tồn kho (`stock`) không đủ cho đơn hàng.
 
-### 3.4. Hàm `findOrderById(userId: number, orderId: number)`
-- **Mục đích:** Xem chi tiết một đơn hàng.
-- **Logic:** Query đơn hàng phải thỏa mãn đồng thời `id = orderId` và `userId = userId` (bảo vệ quyền truy cập, không cho xem đơn của người khác).
-- **Error Handling:** Nếu không tìm thấy $\rightarrow$ Ném `NotFoundException('Không tìm thấy đơn hàng')`.
-- **Trả về:** Đơn hàng được format qua `serializeOrder`.
+2. **Tính toán Tổng tiền**:
+   - Duyệt qua các items, tính `subtotal` bằng cách nhân giá sản phẩm với số lượng (`item.product.price.mul(item.quantity)`). Chú ý rằng hệ thống sử dụng `Prisma.Decimal` cho các thao tác tiền tệ để tránh lỗi làm tròn số thực (floating-point precision issues).
+   - Cộng dồn lại để ra `total` của toàn bộ đơn hàng.
 
-### 3.5. Hàm `serializeOrder(order)`
-- **Mục đích:** Helper function riêng của service để chuyển đổi các trường dữ liệu `Decimal` (Prisma format) từ Database sang dạng `String` (để an toàn khi trả về client bằng JSON). Xây dựng cấu trúc Object chuẩn bám sát kiểu `OrderResponse`.
+3. **Tạo Đơn hàng (Create Order)**:
+   - Tạo bản ghi mới trong bảng `Order` với trạng thái `PENDING`. Dữ liệu của sản phẩm (như giá và tên) tại thời điểm thanh toán được sao chép cứng vào `OrderItem` (`productName`, `productPrice`). Đây là một best practice cực kỳ quan trọng: thông tin trong đơn hàng là "snapshot" lịch sử và sẽ không bị thay đổi nếu sau này người quản trị hệ thống đổi tên hoặc tăng/giảm giá sản phẩm.
+
+4. **Trừ Tồn kho (Deduct Stock)**:
+   - Thay vì trừ tồn kho bằng lệnh `update` thông thường, hệ thống sử dụng `updateMany` kết hợp với điều kiện an toàn `stock: { gte: item.quantity }`. (Xem phân tích chi tiết ở mục khóa dữ liệu bên dưới).
+
+5. **Hoàn tất Giỏ hàng**:
+   - Cập nhật trạng thái của giỏ hàng hiện tại thành `COMPLETED`. User sẽ tự động có một giỏ hàng mới (`ACTIVE`) khi thêm sản phẩm trong lần mua sắm tiếp theo.
+
+### Prisma `$transaction` API
+
+Toàn bộ 5 bước trên được bọc bên trong một Prisma `$transaction(async (tx) => { ... })`.
+- Điều này có nghĩa là tất cả các thao tác đọc/ghi cơ sở dữ liệu bên trong hàm callback `tx` được coi là một **giao dịch duy nhất**.
+- Nếu bất kỳ truy vấn nào thất bại, hoặc nếu logic chủ động ném ra một exception (ví dụ: `throw new BadRequestException(...)`), toàn bộ các thay đổi cơ sở dữ liệu sẽ bị **rollback** (hoàn tác) ngay lập tức.
+- Ví dụ: Đơn hàng đã được tạo, nhưng việc trừ tồn kho của sản phẩm thứ hai bị thất bại vì có người khác vừa mua hết. Prisma sẽ tự động xóa bản ghi đơn hàng vừa tạo, trả lại nguyên trạng tồn kho của sản phẩm thứ nhất, hủy bỏ thay đổi trạng thái giỏ hàng, và báo lỗi cho người dùng. Không bao giờ xảy ra tình trạng dữ liệu "nửa vời".
+
+### Cơ chế Khóa Lạc quan/Bi quan (Optimistic/Pessimistic Locking) bằng `updateMany`
+
+Việc trừ tồn kho là một thao tác nhạy cảm, dễ gặp lỗi *race condition* (khi nhiều user cùng thanh toán một sản phẩm tại cùng một thời điểm, dẫn đến bán vượt quá số lượng trong kho). Hệ thống giải quyết triệt để việc này bằng `updateMany`:
+
+```typescript
+const updated = await tx.product.updateMany({
+  where: {
+    id: item.productId,
+    status: ProductStatus.ACTIVE,
+    deletedAt: null,
+    stock: { gte: item.quantity }, // ĐIỀU KIỆN THEN CHỐT
+  },
+  data: {
+    stock: { decrement: item.quantity },
+  },
+});
+
+if (updated.count !== 1) {
+  throw new BadRequestException(`${item.product.name} không đủ hàng`);
+}
+```
+
+- **Ngăn chặn Race Condition**: Dưới database, truy vấn SQL sinh ra sẽ có dạng `UPDATE Product SET stock = stock - quantity WHERE id = X AND stock >= quantity`. Các hệ quản trị cơ sở dữ liệu quan hệ (như PostgreSQL/MySQL) sẽ áp dụng khóa cấp độ hàng (row-level lock) tự động cho bản ghi này trong lúc thực thi câu lệnh UPDATE.
+- Nếu có hai request (A và B) cùng chạy tới đoạn code này cùng lúc, cơ sở dữ liệu sẽ bắt buộc chúng phải xếp hàng. Request A chạy trước, thỏa mãn `stock >= quantity`, tồn kho bị trừ thành công. Khi Request B thực thi ngay sau đó, nó kiểm tra điều kiện `stock >= quantity`, nếu lượng tồn kho hiện tại không còn đủ, câu lệnh UPDATE sẽ thất bại và bỏ qua bản ghi đó (`updated.count === 0`). Service sau đó ném lỗi `BadRequestException`, hủy transaction. Đây là một dạng khóa thông minh giúp bảo toàn dữ liệu an toàn tuyệt đối ở môi trường đồng thời (concurrency) cao.
+
+## 3. Returns và Outputs
+
+### Helper method `serializeOrder`
+
+Prisma trả về dữ liệu có kiểu phức tạp, đặc biệt là các trường tiền tệ (như giá sản phẩm, tổng tiền) được định dạng bằng kiểu `Prisma.Decimal`. Nếu trả trực tiếp các object này qua HTTP, các thư viện JSON (như của Express) thường sẽ biến chúng thành object lồng nhau khó đọc hoặc gặp lỗi làm tròn sai.
+
+Để giải quyết, `OrdersService` định nghĩa một hàm private là `serializeOrder`:
+- **Chuyển đổi Decimal thành String**: `.toString()` được gọi trên các biến `total`, `productPrice`, `subtotal`. Client sẽ nhận chuỗi (string) - ví dụ `"150000.00"` - và có thể hiển thị trực tiếp hoặc dùng các thư viện xử lý tiền tệ riêng ở Frontend.
+- **Chuẩn hóa dữ liệu trả về**: Hàm này cấu trúc chính xác kiểu dữ liệu thành object `OrderResponse` mong muốn, "phẳng hóa" (flatten) các quan hệ phức tạp và loại bỏ các trường không cần thiết khỏi payload.
+
+### Vòng đời dữ liệu (Data Lifecycle) từ Service tới Controller
+
+1. Service sử dụng `serializeOrder` và trả về một object đã được chuẩn hóa (kiểu `OrderResponse`).
+2. Trở lại `OrdersController`, dữ liệu này được nhận và bao bọc bởi hàm tiện ích `success()` (từ `src/common/utils/api-response.util`): `return success(order);`.
+3. Hàm `success()` có nhiệm vụ cấu trúc lại toàn bộ phản hồi API theo một quy ước chung thống nhất của toàn hệ thống (Standardized API Response). Thông thường, dạng trả về sẽ là:
+   ```json
+   {
+     "success": true,
+     "data": {
+       "id": 1,
+       "status": "PENDING",
+       "total": "150000.00",
+       "address": "123 Đường ABC",
+       "createdAt": "2026-05-21T10:00:00.000Z",
+       "updatedAt": "2026-05-21T10:00:00.000Z",
+       "items": [
+         {
+           "id": 10,
+           "productId": 5,
+           "productName": "Sản phẩm A",
+           "productPrice": "150000.00",
+           "quantity": 1,
+           "subtotal": "150000.00"
+         }
+       ]
+     }
+   }
+   ```
+4. Cuối cùng, NestJS sẽ tự động đảm nhiệm quá trình tuần tự hóa object kết quả này thành một chuỗi JSON chuẩn và đính kèm vào response HTTP với status `200 OK` (mặc định) để gửi về cho phía client.

@@ -1,112 +1,97 @@
 # Giải Thích Chi Tiết - Module Admin (`src/admin`)
 
-`src/admin` là trung tâm điều hành hệ thống (Back-office). Module này cung cấp các API đặc quyền chỉ dành cho Quản trị viên (Admin) để quản lý danh mục (Category), sản phẩm (Product) và đơn hàng (Order).
+Module `admin` đóng vai trò là "bộ não" quản trị (Back-office) của hệ thống. Đây là nơi cung cấp các API đặc quyền để Quản trị viên (Admin) vận hành cửa hàng, bao gồm việc quản lý danh mục (Category), sản phẩm (Product) và tiến trình xử lý đơn hàng (Order). 
 
-## 1. Cấu trúc và Bảo mật
-
-Tất cả các endpoint trong module này đều được bảo vệ nghiêm ngặt:
-
-- **`@UseGuards(AuthGuard, RolesGuard)`**: Yêu cầu người dùng phải đăng nhập (`AuthGuard`) và phải có vai trò phù hợp (`RolesGuard`).
-- **`@Roles(UserRole.ADMIN)`**: Ràng buộc chỉ những tài khoản có `role: 'ADMIN'` trong cơ sở dữ liệu mới được phép truy cập.
+Dưới đây là một phân tích **chuyên sâu** về cách các thành phần trong module này (Controller, Service) tương tác với nhau, luồng dữ liệu từ Client đến Database và cách trả về.
 
 ---
 
-## 2. Phân tích chi tiết Controller (`admin.controller.ts`)
+## 1. Controller: "Người gác cổng" và Điều phối viên (`admin.controller.ts`)
 
-Mỗi request gửi đến `/admin` sẽ được điều phối bởi `AdminController`.
+`AdminController` là điểm chạm đầu tiên của mọi request gửi đến các endpoint bắt đầu bằng `/admin`. Trước khi dữ liệu thực sự chạm đến logic xử lý, nó phải đi qua một loạt các trạm kiểm duyệt.
 
-### 2.1. Quản lý Danh mục (Categories)
+### 1.1. Hệ thống Decorator: Bảo vệ và Phân giải dữ liệu
 
-| Endpoint | Method | Body / Params | Mô tả |
-| :--- | :--- | :--- | :--- |
-| `/admin/categories` | `POST` | `CreateCategoryDto` | Tạo danh mục mới. Trả về object `Category` vừa tạo. |
-| `/admin/categories/:id` | `PATCH` | `id` (path), `UpdateCategoryDto` | Cập nhật thông tin danh mục. Trả về `Category` sau khi sửa. |
+Mỗi decorator trong NestJS có một nhiệm vụ cực kỳ cụ thể để đảm bảo an toàn và cấu trúc dữ liệu:
 
-### 2.2. Quản lý Sản phẩm (Products)
+- **`@Controller('admin')`**: Định tuyến tất cả request có prefix `/admin` vào class này.
+- **`@UseGuards(AuthGuard, RolesGuard)`**: Hai lớp khiên bảo vệ.
+  - `AuthGuard`: Kiểm tra JWT Token trong header `Authorization`. Nếu hợp lệ, nó sẽ giải mã và gắn thông tin người dùng (user payload) vào object `Request`.
+  - `RolesGuard`: Chạy ngay sau `AuthGuard`. Nó sẽ đọc role của user và so sánh với quyền được yêu cầu.
+- **`@Roles(UserRole.ADMIN)`**: Định nghĩa Metadata cho `RolesGuard` biết rằng: "Chỉ cho phép tài khoản có role là `ADMIN` đi qua".
+- **`@Req() request`**: Trích xuất toàn bộ object `Request` của Express. Ở đây, ta dùng nó để lấy `request.user.userId` (đã được `AuthGuard` nhét vào) nhằm mục đích ghi log (ai là người thực hiện hành động).
+- **`@Body() dto`**: Hứng dữ liệu JSON từ phần thân (body) của request, sau đó chuyển đổi và xác thực thông qua các DTO (`CreateCategoryDto`, `UpdateProductDto`...). Nếu dữ liệu sai định dạng (ví dụ thiếu `name` hoặc `price` không hợp lệ), NestJS tự động chặn lại và trả về lỗi 400 Bad Request ngay tại đây, không cho phép tiến vào Controller.
+- **`@Param('id', ParseIntPipe)`**: Lấy tham số `id` từ URL (ví dụ `/admin/products/5`) và tự động ép kiểu sang dạng `number` an toàn thông qua `ParseIntPipe`. Nếu `id` không phải là số, sẽ trả về lỗi 400.
+- **`@Query() query`**: Trích xuất các tham số trên URL (ví dụ `/admin/orders?page=2&status=PENDING`) và map vào `AdminOrderQueryDto`.
 
-| Endpoint | Method | Body / Params | Mô tả |
-| :--- | :--- | :--- | :--- |
-| `/admin/products` | `POST` | `CreateProductDto` | Tạo sản phẩm kèm theo ảnh. Trả về `Product` kèm `images` và `category`. |
-| `/admin/products/:id` | `PATCH` | `id` (path), `UpdateProductDto` | Cập nhật sản phẩm. Nếu có `images`, toàn bộ ảnh cũ sẽ bị thay thế. |
-| `/admin/products/:id` | `DELETE` | `id` (path) | **Xóa mềm** sản phẩm bằng cách gán `deletedAt`. |
+### 1.2. Phân tích chi tiết các Endpoint
 
-### 2.3. Quản lý Đơn hàng (Orders)
+- **Quản lý Danh mục (`POST /admin/categories`, `PATCH /admin/categories/:id`)**: Nhận `CreateCategoryDto` hoặc `UpdateCategoryDto`. Chuyển dữ liệu xuống Service. Kết quả trả về được bọc qua `success()` - một tiện ích chuẩn hóa cấu trúc JSON (`{ statusCode: 200, data: ... }`).
+- **Quản lý Sản phẩm (`POST /admin/products`, `PATCH /admin/products/:id`, `DELETE /admin/products/:id`)**: Nhận dữ liệu tạo/sửa hoặc `id` để xóa mềm. Luồng xử lý tương tự, đẩy việc nặng xuống Service và gói kết quả lại.
+- **Quản lý Đơn hàng (`GET /admin/orders`, `PATCH /admin/orders/:id/status`)**: API `GET` dùng để liệt kê, gọi `adminService.findOrders` và sử dụng hàm `paginated()` để định dạng kết quả phân trang chuẩn (`{ data: [], meta: { total, page, limit } }`). API `PATCH` cập nhật trạng thái đơn hàng.
 
-| Endpoint | Method | Body / Params | Mô tả |
-| :--- | :--- | :--- | :--- |
-| `/admin/orders` | `GET` | `AdminOrderQueryDto` (Query) | Lấy danh sách đơn hàng có phân trang và lọc theo trạng thái. |
-| `/admin/orders/:id/status` | `PATCH` | `id` (path), `UpdateOrderStatusDto` | Cập nhật trạng thái đơn hàng (ví dụ: từ `PENDING` sang `SHIPPED`). |
-
----
-
-## 3. Phân tích chi tiết Service (`admin.service.ts`)
-
-`AdminService` chứa logic nghiệp vụ cốt lõi, tương tác với database qua `PrismaService` và quản lý cache qua `RedisService`.
-
-### 3.1. Các phương thức bổ trợ (Internal Helpers)
-- **`ensureCategoryExists(id)`**: Kiểm tra danh mục có tồn tại không. Nếu không, ném lỗi `NotFoundException (404)`.
-- **`ensureProductExists(id)`**: Kiểm tra sản phẩm có tồn tại không. Trả về `product` nếu tìm thấy, ngược lại ném lỗi 404.
-- **`ensureUniqueCategorySlug(slug, excludeId?)`**: Đảm bảo `slug` danh mục là duy nhất. Nếu trùng, ném lỗi `ConflictException (409)`.
-- **`ensureUniqueProductSlug(slug, excludeId?)`**: Tương tự cho sản phẩm, giúp URL SEO không bị trùng lặp.
-
-### 3.2. Xử lý nghiệp vụ chính
-
-#### Tạo & Cập nhật Sản phẩm (`createProduct`, `updateProduct`)
-- **Ép kiểu dữ liệu**: `price` từ client gửi lên là chuỗi (string) để tránh sai số dấu phẩy động, service sẽ chuyển thành `Prisma.Decimal` trước khi lưu.
-- **Xử lý ảnh (Images)**:
-    - Khi **tạo**: Dùng `images: { create: [...] }` để lưu quan hệ 1-nhiều.
-    - Khi **cập nhật**: Service thực hiện chiến thuật "Xóa hết tạo lại" (`deleteMany: {}` sau đó `create: [...]`). Điều này giúp logic đơn giản nhưng yêu cầu client gửi lại toàn bộ danh sách ảnh muốn giữ.
-- **Xóa Cache**: Gọi `invalidateProductCache(slug)` để đảm bảo khách hàng thấy dữ liệu mới nhất ngay lập tức.
-
-#### Xóa mềm (`softDeleteProduct`)
-Thay vì dùng lệnh `DELETE` trong SQL, hệ thống cập nhật trường `deletedAt`. Điều này giúp bảo toàn tính toàn vẹn dữ liệu cho các báo cáo doanh thu và lịch sử đơn hàng cũ.
-
-#### Quản lý Đơn hàng (`findOrders`)
-Sử dụng `Promise.all` để thực hiện đồng thời hai truy vấn:
-1. `prisma.order.findMany`: Lấy dữ liệu đơn hàng kèm thông tin User (chỉ lấy id, email, name) và các Item.
-2. `prisma.order.count`: Đếm tổng số đơn hàng để phục vụ phân trang.
+**Luồng dữ liệu đến Controller:** Client -> HTTP Request -> Middleware -> Guard (`AuthGuard`, `RolesGuard`) -> Pipe (`ValidationPipe` trên DTO, `ParseIntPipe`) -> **Controller Method**.
 
 ---
 
-## 4. Chi tiết DTO (`src/admin/dto`)
+## 2. Service: "Khối óc" xử lý nghiệp vụ (`admin.service.ts`)
 
-DTO (Data Transfer Object) đóng vai trò là "người gác cổng" kiểm soát dữ liệu đầu vào.
+Nếu Controller là lễ tân, thì `AdminService` chính là những chuyên gia phía sau xử lý logic cốt lõi. Nơi đây quyết định dữ liệu có được lưu trữ hay không.
 
-### 4.1. Product DTOs
-- **`CreateProductDto`**: 
-    - `@IsString() price`: Nhận giá dưới dạng chuỗi.
-    - `@IsInt() stock`: Số lượng tồn kho (phải >= 0).
-    - `@IsEnum(ProductStatus)`: Trạng thái (ACTIVE, INACTIVE).
-    - `@ValidateNested()`: Kiểm tra tính hợp lệ của từng object ảnh trong mảng `images`.
-- **`UpdateProductDto`**: Giống `CreateProductDto` nhưng tất cả các trường đều là `@IsOptional()`.
+### 2.1. Tương tác giữa Public Methods và Private Helpers
 
-### 4.2. Order DTOs
-- **`AdminOrderQueryDto`**: Kế thừa từ `PaginationQueryDto`, bổ sung thêm lọc theo `status` (Enum `OrderStatus`).
-- **`AdminOrderResponseDto`**: 
-    - Chuyển đổi dữ liệu thô từ Prisma sang định dạng JSON sạch.
-    - **Quan trọng**: Chuyển tất cả các trường `Decimal` (price, subtotal, total) thành `string` để frontend hiển thị chính xác.
-    - Ánh xạ thông tin khách hàng và danh sách sản phẩm trong đơn.
+Một trong những thiết kế quan trọng của Service là việc tách biệt các kiểm tra nghiệp vụ (business validation) thành các hàm private (helper methods).
+
+Khi một hàm public như `createProduct(adminUserId, dto)` được gọi:
+1. DTO chảy từ Controller thẳng vào hàm này.
+2. Nó không gọi database lưu ngay lập tức, mà phải trải qua kiểm tra tính đúng đắn thông qua các private helper:
+   - `await this.ensureCategoryExists(dto.categoryId);`: Helper này query Prisma. Nếu category không tồn tại, nó chủ động ném `NotFoundException(404)`. Hệ thống tự động bắt lỗi và báo về cho client.
+   - `await this.ensureUniqueProductSlug(dto.slug);`: Helper này kiểm tra trùng lặp slug. Nếu trùng, nó ném `ConflictException(409)`.
+3. Chỉ khi tất cả helper đều pass (không throw exception), tiến trình lưu vào Database mới được thực hiện.
+
+Điều này làm cho hàm public ngắn gọn, dễ đọc và tập trung vào luồng chính (Happy Path), trong khi các logic kiểm tra phức tạp được giấu gọn bên trong helper.
+
+### 2.2. Chi tiết một số nghiệp vụ phức tạp
+
+- **`updateProduct(adminUserId, id, dto)`**:
+  - DTO đưa vào có thể chỉ chứa một vài trường cần cập nhật (nhờ tính chất `Partial` của Update DTO).
+  - Nó sử dụng toán tử spread (`...rest`) để tách lấy những trường bình thường.
+  - Xử lý ảnh là một chiến thuật đặc biệt: thay vì tìm xem ảnh nào xóa/thêm/sửa, Service sử dụng "xóa hết và tạo mới" (`deleteMany: {}` tiếp theo là `create`). Đây là cách đồng bộ nhanh chóng, đẩy trách nhiệm sắp xếp và quản lý danh sách ảnh về phía Frontend.
+
+- **`findOrders(query)`**:
+  - Sử dụng `Promise.all([findMany, count])` để tối ưu hóa. Thay vì chờ lấy danh sách xong mới đếm tổng, hai query này chạy song song (concurrently) bằng Prisma, giảm một nửa thời gian phản hồi.
+  - Data trả về từ database được map thủ công qua `new AdminOrderResponseDto(order)` để làm sạch dữ liệu trước khi trả về.
 
 ---
 
-## 5. Luồng dữ liệu và Xử lý lỗi
+## 3. Quản lý Kết quả trả về (Outputs & Returns)
 
-1. **Request**: Admin gửi request kèm JWT Token.
-2. **Guard**: Kiểm tra token và quyền `ADMIN`.
-3. **Validation**: DTO kiểm tra định dạng dữ liệu (ví dụ: `price` phải là chuỗi, `stock` phải là số).
-4. **Service Logic**:
-    - Kiểm tra logic: Slug có trùng không? Danh mục có tồn tại không?
-    - Nếu sai: Ném lỗi (404, 409). NestJS tự động chuyển thành response JSON tương ứng.
-5. **Database**: Thực thi truy vấn qua Prisma.
-6. **Cache Invalidation**:
-    - Nếu là danh mục: Xóa toàn bộ cache danh mục và reset cache chung.
-    - Nếu là sản phẩm: Xóa cache chi tiết của sản phẩm đó dựa trên `slug`.
-7. **Response**: Dữ liệu được chuẩn hóa qua `AdminOrderResponseDto` (nếu là đơn hàng) và bọc trong hàm `success()` để trả về client.
+Dữ liệu đi theo hành trình quay ngược lại vô cùng rõ ràng:
 
-## 6. Ghi nhật ký (Logging)
+1. **Từ Database (Prisma)**: Trả về một object nguyên thủy chứa thông tin (ví dụ: `Product` kèm `images` và `category`). Ở giai đoạn này, dữ liệu còn khá "thô", có thể chứa cấu trúc của Prisma như kiểu `Decimal` cho giá tiền.
+2. **Từ Service**: Đôi khi Service trả trực tiếp (với Product, Category), nhưng ở những entity phức tạp như Order, nó gọi `new AdminOrderResponseDto()` để mapping (chuyển `Decimal` về `string` để trình duyệt không bị sai số float). Service trả object này về lại cho Controller.
+3. **Từ Controller về Client**: Object chưa thể đi trực tiếp. Controller gói nó qua hàm `success(product)` (từ `src/common/utils/api-response.util.ts`).
+   - **Tại sao phải bọc (wrapped)?**: Để tạo sự đồng nhất (consistency). Bất kể client gọi API lấy user, order hay product, cấu trúc JSON trả về luôn có dạng:
+     ```json
+     {
+       "statusCode": 200,
+       "message": "Success",
+       "data": { "id": 1, "name": "..." }
+     }
+     ```
+   - Điều này giúp frontend không cần phải viết lại logic parse JSON cho từng API. Tất cả đều tuân thủ một chuẩn giao tiếp duy nhất.
 
-Service sử dụng `Logger` của NestJS để ghi lại các hành động quan trọng:
-- `Admin 1 created product 10`
-- `Admin 1 updated order 5 status PENDING -> SHIPPED`
+---
 
-Điều này cực kỳ quan trọng trong môi trường doanh nghiệp để truy vết (Audit Trail) xem ai đã thay đổi gì trên hệ thống.
+## 4. Vai trò của Third-Party & Thư viện
+
+Module này hoạt động trơn tru nhờ sự phối hợp của ba công cụ đắc lực:
+
+- **Prisma (`PrismaService`)**: Là cầu nối giao tiếp với cơ sở dữ liệu. Nó đóng vai trò ORM, dịch các object JavaScript (như `{ where: { id }, data: dto }`) thành câu lệnh SQL an toàn. Prisma trả về các object có đầy đủ type-safe (an toàn kiểu dữ liệu), giúp IDE cảnh báo ngay nếu truy xuất sai tên cột.
+- **Redis (`RedisService`)**: Đóng vai trò là hệ thống tăng tốc (Cache). 
+  - Admin là người thay đổi dữ liệu (ví dụ: đổi giá sản phẩm). Khách hàng (End-user) là người xem. 
+  - Nếu admin update sản phẩm nhưng bộ nhớ tạm (Cache) của khách hàng không được xóa đi, họ sẽ vẫn thấy giá cũ.
+  - Do đó, sau mỗi lệnh `create/update/delete` thành công trên Prisma, service bắt buộc phải gọi các hàm như `this.invalidateProductCache(product.slug)`. Redis sẽ dọn dẹp các cache key liên quan (ví dụ `product:dien-thoai-iphone`), buộc hệ thống phải lấy dữ liệu mới ở lần truy cập tiếp theo của khách hàng.
+- **Logging (`Logger`)**: `this.logger.log(...)` được gọi mỗi khi có thao tác thay đổi dữ liệu.
+  - Nó ghi lại chuỗi như `"Admin 1 updated order 5 status PENDING -> SHIPPED"`.
+  - Trong các hệ thống Enterprise, điều này là cốt lõi để tạo ra **Audit Trail** (dấu vết kiểm toán). Nếu đơn hàng bị hủy sai quy định hoặc giá bán bị thay đổi, quản trị viên cấp cao có thể dựa vào log này để biết chính xác `adminUserId` nào đã làm việc đó vào lúc nào.

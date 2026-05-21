@@ -80,6 +80,17 @@ Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-s
 - For multi-step tasks, state a brief plan with verification steps.
 - Strong success criteria let you loop independently.
 
+### 5. No Unsolicited Plans
+**Do not create plan .md files unless explicitly requested.**
+- Do not generate or save implementation plans to `.md` files (e.g., in `docs/superpowers/plans/`) unless the user specifically asks for a written plan file.
+- Keep planning internal to the conversation unless a persistent record is required.
+
+### 6. Session & Plan Storage
+**Store all requested plans and session updates in `docs/session/`.**
+- When creating a plan or updating a session (upon request), always check for a folder named with the current date (e.g., `docs/session/2026-05-21/`).
+- If the folder does not exist, create it.
+- Save the requested files within that specific date folder to maintain a chronological history.
+
 ---
 *Every changed line should trace directly to the user's request.*
 
