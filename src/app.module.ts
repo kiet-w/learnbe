@@ -1,5 +1,6 @@
-import { Module } from '@nestjs/common';
+import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_PIPE } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
@@ -48,6 +49,16 @@ import { AdminModule } from './admin/admin.module';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_PIPE,
+      useValue: new ValidationPipe({
+        whitelist: true, // Loại bỏ các trường không được định nghĩa trong DTO
+        transform: true, // Tự động convert kiểu dữ liệu (vd: string -> number)
+        forbidNonWhitelisted: true, // Báo lỗi nếu gửi lên trường lạ
+      }),
+    },
+  ],
 })
 export class AppModule {}

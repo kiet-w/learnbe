@@ -11,15 +11,6 @@ async function bootstrap() {
   const port = Number(configService.get<string>('PORT') ?? 3000);
   app.use(cookieParser());
 
-  // Bật ValidationPipe toàn cục
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true, // Loại bỏ các trường không được định nghĩa trong DTO
-      transform: true, // Tự động convert kiểu dữ liệu (vd: string -> number)
-      forbidNonWhitelisted: true, // Báo lỗi nếu gửi lên trường lạ
-    }),
-  );
-
   // Đăng ký Exception Filter toàn cục
   app.useGlobalFilters(new AllExceptionsFilter());
 
