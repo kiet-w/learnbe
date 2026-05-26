@@ -32,12 +32,19 @@ export async function expectLoginCookies(
     .send({ email, password })
     .expect(201);
 
-  const cookies = response.headers['set-cookie'] ?? [];
+  const rawCookies = response.headers['set-cookie'];
+  const cookies: string[] = Array.isArray(rawCookies)
+    ? rawCookies
+    : typeof rawCookies === 'string'
+      ? [rawCookies]
+      : [];
 
-  expect(cookies.some((cookie) => cookie.includes('access_token='))).toBe(true);
-  expect(cookies.some((cookie) => cookie.includes('refresh_token='))).toBe(
-    true,
-  );
+  expect(
+    cookies.some((cookie: string) => cookie.includes('access_token=')),
+  ).toBe(true);
+  expect(
+    cookies.some((cookie: string) => cookie.includes('refresh_token=')),
+  ).toBe(true);
 
   return response;
 }

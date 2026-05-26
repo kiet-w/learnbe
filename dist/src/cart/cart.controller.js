@@ -14,8 +14,11 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CartController = void 0;
 const common_1 = require("@nestjs/common");
+const client_1 = require("@prisma/client");
 const api_response_util_1 = require("../common/utils/api-response.util");
 const auth_guard_1 = require("../auth/auth.guard");
+const roles_decorator_1 = require("../common/decorators/roles.decorator");
+const roles_guard_1 = require("../common/guards/roles.guard");
 const cart_service_1 = require("./cart.service");
 const add_cart_item_dto_1 = require("./dto/add-cart-item.dto");
 const update_cart_item_dto_1 = require("./dto/update-cart-item.dto");
@@ -87,7 +90,8 @@ __decorate([
 ], CartController.prototype, "clearCart", null);
 exports.CartController = CartController = __decorate([
     (0, common_1.Controller)('cart'),
-    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
+    (0, common_1.UseGuards)(auth_guard_1.AuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)(client_1.UserRole.CUSTOMER),
     __metadata("design:paramtypes", [cart_service_1.CartService])
 ], CartController);
 //# sourceMappingURL=cart.controller.js.map

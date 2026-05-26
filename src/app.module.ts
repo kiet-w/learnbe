@@ -9,10 +9,14 @@ import { UserModule } from './user/user.module';
 import { RedisModule } from './redis/redis.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
-import { CatalogModule } from './catalog/catalog.module';
+import { CatalogProductsModule } from './catalog/products/products.module';
+import { CatalogCategoriesModule } from './catalog/categories/categories.module';
 import { CartModule } from './cart/cart.module';
 import { OrdersModule } from './orders/orders.module';
-import { AdminModule } from './admin/admin.module';
+import { AdminUsersModule } from './admin/users/admin-users.module';
+import { AdminProductsModule } from './admin/products/admin-products.module';
+import { AdminCategoriesModule } from './admin/categories/admin-categories.module';
+import { AdminOrdersModule } from './admin/orders/admin-orders.module';
 
 @Module({
   imports: [
@@ -23,10 +27,14 @@ import { AdminModule } from './admin/admin.module';
     AuthModule,
     UserModule,
     RedisModule,
-    CatalogModule,
+    CatalogProductsModule,
+    CatalogCategoriesModule,
     CartModule,
     OrdersModule,
-    AdminModule,
+    AdminUsersModule,
+    AdminProductsModule,
+    AdminCategoriesModule,
+    AdminOrdersModule,
     CacheModule.registerAsync({
       isGlobal: true,
       inject: [ConfigService],

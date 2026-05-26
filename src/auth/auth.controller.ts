@@ -3,9 +3,7 @@ import {
   Post,
   Body,
   Res,
-  Get,
   Req,
-  UseGuards,
   UseInterceptors,
   ClassSerializerInterceptor,
   SerializeOptions,
@@ -14,11 +12,7 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
-import { UserResponseDto } from './dto/user-response.dto';
-import { AuthGuard } from './auth.guard';
 import type { Response, Request } from 'express';
-
-import { JwtPayloadDto } from './dto/jwt-payload.dto';
 
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -62,17 +56,5 @@ export class AuthController {
       'access_token'
     ];
     return this.authService.handleLogout(accessToken, response);
-  }
-
-  @Get('me')
-  @UseGuards(AuthGuard)
-  @SerializeOptions({ type: UserResponseDto })
-  me(@Req() request: Request & { user: JwtPayloadDto }) {
-    return new UserResponseDto({
-      id: request.user.userId,
-      email: request.user.email,
-      name: null,
-      role: request.user.role,
-    });
   }
 }

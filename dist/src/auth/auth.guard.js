@@ -12,12 +12,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthGuard = void 0;
 const common_1 = require("@nestjs/common");
 const auth_service_1 = require("./auth.service");
+const user_service_1 = require("../user/user.service");
 let AuthGuard = class AuthGuard {
     authService;
-    constructor(authService) {
+    userService;
+    constructor(authService, userService) {
         this.authService = authService;
+        this.userService = userService;
     }
-    canActivate(context) {
+    async canActivate(context) {
         const request = context
             .switchToHttp()
             .getRequest();
@@ -30,6 +33,10 @@ let AuthGuard = class AuthGuard {
         if (!payload) {
             throw new common_1.UnauthorizedException('Phiên đăng nhập hết hạn hoặc không hợp lệ. Vui lòng làm mới token.');
         }
+        const user = await this.userService.findById(payload.userId);
+        if (!user || !user.isActive) {
+            throw new common_1.UnauthorizedException('Tài khoản đã bị khóa hoặc không tồn tại');
+        }
         request.user = payload;
         return true;
     }
@@ -37,6 +44,7 @@ let AuthGuard = class AuthGuard {
 exports.AuthGuard = AuthGuard;
 exports.AuthGuard = AuthGuard = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [auth_service_1.AuthService])
+    __metadata("design:paramtypes", [auth_service_1.AuthService,
+        user_service_1.UserService])
 ], AuthGuard);
 //# sourceMappingURL=auth.guard.js.map

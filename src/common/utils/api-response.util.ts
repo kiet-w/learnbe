@@ -3,9 +3,14 @@ import {
   PaginatedApiResponse,
 } from '../interfaces/api-response.interface';
 
-export function success<T>(data: T): ApiResponse<T> {
+export function success<T>(
+  data: T,
+  message: string = 'Thành công',
+  statusCode: number = 200,
+): ApiResponse<T> {
   return {
-    success: true,
+    statusCode,
+    message,
     data,
   };
 }
@@ -15,9 +20,12 @@ export function paginated<T>(
   total: number,
   page: number,
   limit: number,
+  message: string = 'Thành công',
+  statusCode: number = 200,
 ): PaginatedApiResponse<T> {
   return {
-    success: true,
+    statusCode,
+    message,
     data,
     meta: {
       total,

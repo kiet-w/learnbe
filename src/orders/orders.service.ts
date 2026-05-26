@@ -128,7 +128,10 @@ export class OrdersService {
     return orders.map((order) => this.serializeOrder(order));
   }
 
-  async findOrderById(userId: number, orderId: number): Promise<OrderResponseDto> {
+  async findOrderById(
+    userId: number,
+    orderId: number,
+  ): Promise<OrderResponseDto> {
     const order = await this.prisma.order.findFirst({
       where: {
         id: orderId,

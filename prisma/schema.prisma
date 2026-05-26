@@ -38,6 +38,7 @@ model User {
   password     String
   refreshToken String?
   role         UserRole  @default(CUSTOMER)
+  isActive     Boolean   @default(true)
   posts        Post[]
   carts        Cart[]
   orders       Order[]

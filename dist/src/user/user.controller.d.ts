@@ -1,39 +1,15 @@
+import type { Request } from 'express';
 import { UserService } from './user.service';
-import { Prisma } from '@prisma/client';
+import { JwtPayloadDto } from '../auth/dto/jwt-payload.dto';
+import { UserResponseDto } from '../auth/dto/user-response.dto';
+import { UpdateMeDto } from './dto/update-me.dto';
 export declare class UserController {
-    private userService;
+    private readonly userService;
     constructor(userService: UserService);
-    create(data: Prisma.UserCreateInput): Promise<{
-        id: number;
-        email: string;
-        name: string | null;
-        password: string;
-        refreshToken: string | null;
-        role: import("@prisma/client").$Enums.UserRole;
-    }>;
-    findAll(): Promise<any>;
-    findOne(id: number): Promise<{
-        id: number;
-        email: string;
-        name: string | null;
-        password: string;
-        refreshToken: string | null;
-        role: import("@prisma/client").$Enums.UserRole;
-    } | null>;
-    update(id: number, data: Prisma.UserUpdateInput): Promise<{
-        id: number;
-        email: string;
-        name: string | null;
-        password: string;
-        refreshToken: string | null;
-        role: import("@prisma/client").$Enums.UserRole;
-    }>;
-    remove(id: number): Promise<{
-        id: number;
-        email: string;
-        name: string | null;
-        password: string;
-        refreshToken: string | null;
-        role: import("@prisma/client").$Enums.UserRole;
-    }>;
+    getMe(request: Request & {
+        user: JwtPayloadDto;
+    }): Promise<UserResponseDto>;
+    updateMe(request: Request & {
+        user: JwtPayloadDto;
+    }, dto: UpdateMeDto): Promise<UserResponseDto>;
 }

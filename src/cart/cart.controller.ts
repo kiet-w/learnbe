@@ -10,18 +10,22 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { UserRole } from '@prisma/client';
 import type { Request } from 'express';
 import { ApiResponse } from '../common/interfaces/api-response.interface';
 import { success } from '../common/utils/api-response.util';
 import { AuthGuard } from '../auth/auth.guard';
 import { JwtPayloadDto } from '../auth/dto/jwt-payload.dto';
+import { Roles } from '../common/decorators/roles.decorator';
+import { RolesGuard } from '../common/guards/roles.guard';
 import { CartService } from './cart.service';
 import { AddCartItemDto } from './dto/add-cart-item.dto';
 import { UpdateCartItemDto } from './dto/update-cart-item.dto';
 import { CartResponseDto } from './dto/cart-response.dto';
 
 @Controller('cart')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, RolesGuard)
+@Roles(UserRole.CUSTOMER)
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 

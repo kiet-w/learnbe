@@ -2,15 +2,17 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.success = success;
 exports.paginated = paginated;
-function success(data) {
+function success(data, message = 'Thành công', statusCode = 200) {
     return {
-        success: true,
+        statusCode,
+        message,
         data,
     };
 }
-function paginated(data, total, page, limit) {
+function paginated(data, total, page, limit, message = 'Thành công', statusCode = 200) {
     return {
-        success: true,
+        statusCode,
+        message,
         data,
         meta: {
             total,

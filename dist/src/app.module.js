@@ -18,10 +18,14 @@ const user_module_1 = require("./user/user.module");
 const redis_module_1 = require("./redis/redis.module");
 const cache_manager_1 = require("@nestjs/cache-manager");
 const cache_manager_redis_yet_1 = require("cache-manager-redis-yet");
-const catalog_module_1 = require("./catalog/catalog.module");
+const products_module_1 = require("./catalog/products/products.module");
+const categories_module_1 = require("./catalog/categories/categories.module");
 const cart_module_1 = require("./cart/cart.module");
 const orders_module_1 = require("./orders/orders.module");
-const admin_module_1 = require("./admin/admin.module");
+const admin_users_module_1 = require("./admin/users/admin-users.module");
+const admin_products_module_1 = require("./admin/products/admin-products.module");
+const admin_categories_module_1 = require("./admin/categories/admin-categories.module");
+const admin_orders_module_1 = require("./admin/orders/admin-orders.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -35,10 +39,14 @@ exports.AppModule = AppModule = __decorate([
             auth_module_1.AuthModule,
             user_module_1.UserModule,
             redis_module_1.RedisModule,
-            catalog_module_1.CatalogModule,
+            products_module_1.CatalogProductsModule,
+            categories_module_1.CatalogCategoriesModule,
             cart_module_1.CartModule,
             orders_module_1.OrdersModule,
-            admin_module_1.AdminModule,
+            admin_users_module_1.AdminUsersModule,
+            admin_products_module_1.AdminProductsModule,
+            admin_categories_module_1.AdminCategoriesModule,
+            admin_orders_module_1.AdminOrdersModule,
             cache_manager_1.CacheModule.registerAsync({
                 isGlobal: true,
                 inject: [config_1.ConfigService],

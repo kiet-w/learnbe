@@ -7,12 +7,16 @@ import {
 import { AuthService } from './auth.service';
 import { JwtPayloadDto } from './dto/jwt-payload.dto';
 import { Request } from 'express';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private userService: UserService,
+  ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context
       .switchToHttp()
       .getRequest<Request & { user?: JwtPayloadDto }>();
@@ -31,6 +35,13 @@ export class AuthGuard implements CanActivate {
     if (!payload) {
       throw new UnauthorizedException(
         'Phiên đăng nhập hết hạn hoặc không hợp lệ. Vui lòng làm mới token.',
+      );
+    }
+
+    const user = await this.userService.findById(payload.userId);
+    if (!user || !user.isActive) {
+      throw new UnauthorizedException(
+        'Tài khoản đã bị khóa hoặc không tồn tại',
       );
     }
 

@@ -18,8 +18,6 @@ const auth_service_1 = require("./auth.service");
 const register_dto_1 = require("./dto/register.dto");
 const login_dto_1 = require("./dto/login.dto");
 const auth_response_dto_1 = require("./dto/auth-response.dto");
-const user_response_dto_1 = require("./dto/user-response.dto");
-const auth_guard_1 = require("./auth.guard");
 let AuthController = class AuthController {
     authService;
     constructor(authService) {
@@ -38,14 +36,6 @@ let AuthController = class AuthController {
     async logout(request, response) {
         const accessToken = request.cookies['access_token'];
         return this.authService.handleLogout(accessToken, response);
-    }
-    me(request) {
-        return new user_response_dto_1.UserResponseDto({
-            id: request.user.userId,
-            email: request.user.email,
-            name: null,
-            role: request.user.role,
-        });
     }
 };
 exports.AuthController = AuthController;
@@ -84,15 +74,6 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "logout", null);
-__decorate([
-    (0, common_1.Get)('me'),
-    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
-    (0, common_1.SerializeOptions)({ type: user_response_dto_1.UserResponseDto }),
-    __param(0, (0, common_1.Req)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], AuthController.prototype, "me", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)('auth'),
     (0, common_1.UseInterceptors)(common_1.ClassSerializerInterceptor),
