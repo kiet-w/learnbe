@@ -6,6 +6,7 @@ import NoteCard from '@/components/NoteCard';
 import Sidebar from '@/components/Sidebar';
 import { api, Note } from '@/utils/api';
 import { useSSE } from '@/hooks/useSSE';
+import { Inbox } from 'lucide-react';
 
 export default function Home() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -21,7 +22,7 @@ export default function Home() {
   useSSE(handleNoteUpdated);
 
   useEffect(() => {
-    api.getNotes()
+    api.fetchNotes()
       .then(setNotes)
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -57,7 +58,7 @@ export default function Home() {
   };
 
   const filteredNotes = selectedCategory
-    ? notes.filter((n) => n.category === selectedCategory || n.status === 'PROCESSING')
+    ? notes.filter((n) => n.category === selectedCategory || n.status === 'PROCESSING' || n.status === 'FAILED')
     : notes;
 
   return (
@@ -67,32 +68,49 @@ export default function Home() {
         onSelectCategory={setSelectedCategory} 
       />
       
-      <main className="flex-1 flex flex-col items-center p-8 sm:p-24 overflow-y-auto">
-        <div className="w-full max-w-2xl">
+      <main className="flex-1 overflow-y-auto scroll-smooth">
+        <div className="max-w-3xl mx-auto px-6 py-16 sm:px-12">
           <header className="mb-12">
-            <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
-              {selectedCategory ? `${selectedCategory} Notes` : 'Secondary Brain'}
-            </h1>
-            <p className="text-zinc-500 text-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-xl shadow-sm border border-border">
+                {selectedCategory === 'Cooking' ? '🍳' : 
+                 selectedCategory === 'Tech' ? '💻' : 
+                 selectedCategory === 'Personal' ? '👤' : 
+                 selectedCategory === 'Other' ? '📝' : '🧠'}
+              </div>
+              <h1 className="text-4xl font-extrabold text-foreground tracking-tight">
+                {selectedCategory ? selectedCategory : 'Secondary Brain'}
+              </h1>
+            </div>
+            <p className="text-secondary-text text-lg font-medium max-w-xl">
               {selectedCategory 
-                ? `Showing all insights tagged as ${selectedCategory}` 
-                : 'Capture thoughts, let AI organize the chaos.'}
+                ? `Everything tagged as ${selectedCategory}. AI-organized and searchable.` 
+                : 'Your digital extension for thoughts, ideas, and fleeting inspirations.'}
             </p>
           </header>
 
-          <NoteInput onSubmit={handleCapture} />
+          <div className="sticky top-0 z-10 py-4 bg-background/80 backdrop-blur-md mb-8">
+            <NoteInput onSubmit={handleCapture} />
+          </div>
 
-          <div className="flex flex-col gap-4 mt-8">
+          <div className="flex flex-col gap-6">
             {loading ? (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {[1, 2, 3].map((i) => (
-                    <div key={i} className="p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm animate-pulse h-32" />
+                    <div key={i} className="p-6 rounded-xl border border-border bg-white dark:bg-zinc-900 shadow-sm animate-pulse h-40" />
                 ))}
               </div>
             ) : filteredNotes.length === 0 ? (
-              <div className="text-center py-20 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl">
-                <p className="text-zinc-500">No notes found here.</p>
-                {!selectedCategory && <p className="text-xs text-zinc-400 mt-1">Capture your first thought above!</p>}
+              <div className="text-center py-32 border-2 border-dashed border-border rounded-2xl bg-zinc-50/30 dark:bg-zinc-900/10">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-zinc-100 dark:bg-zinc-800 mb-4 text-zinc-400">
+                  <Inbox className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-1">No notes yet</h3>
+                <p className="text-secondary-text max-w-xs mx-auto text-sm">
+                  {selectedCategory 
+                    ? `You don't have any notes in the ${selectedCategory} category.` 
+                    : 'Start by capturing a thought in the input field above!'}
+                </p>
               </div>
             ) : (
               filteredNotes.map((note) => (
