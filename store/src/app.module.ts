@@ -8,6 +8,7 @@ import { InventoryModule } from './inventory/inventory.module';
 import { ShippersModule } from './shippers/shippers.module';
 import { MapboxModule } from './mapbox/mapbox.module';
 import { DeliveryOrdersModule } from './delivery-orders/delivery-orders.module';
+import { DeliveryBatchesModule } from './delivery-batches/delivery-batches.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { DeliveryOrdersModule } from './delivery-orders/delivery-orders.module';
     ShippersModule,
     MapboxModule,
     DeliveryOrdersModule,
+    DeliveryBatchesModule,
   ],
 })
 export class AppModule {}
