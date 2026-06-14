@@ -7,6 +7,7 @@ import { WarehousesModule } from './warehouses/warehouses.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { ShippersModule } from './shippers/shippers.module';
 import { MapboxModule } from './mapbox/mapbox.module';
+import { DeliveryOrdersModule } from './delivery-orders/delivery-orders.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { MapboxModule } from './mapbox/mapbox.module';
     InventoryModule,
     ShippersModule,
     MapboxModule,
+    DeliveryOrdersModule,
   ],
 })
 export class AppModule {}
