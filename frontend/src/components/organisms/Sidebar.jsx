@@ -31,33 +31,33 @@ export const Sidebar = () => {
 
       <nav className="flex-col gap-xs p-sm mt-md" style={{ flexGrow: 1 }}>
         <Link href="/" className={getLinkClass('/')}>
-          <span>📊 Dashboard</span>
+          <span>Dashboard</span>
         </Link>
 
         <RoleGate roles={['ADMIN', 'WAREHOUSE_MANAGER']}>
           <Link href="/products" className={getLinkClass('/products')}>
-            <span>📦 Sản phẩm</span>
+            <span>Sản phẩm</span>
           </Link>
 
           <Link href="/warehouses" className={getLinkClass('/warehouses')}>
-            <span>🏭 Nhà kho</span>
+            <span>Nhà kho</span>
           </Link>
 
           <Link href="/inventory/transactions" className={getLinkClass('/inventory/transactions')}>
-            <span>📋 Giao dịch kho</span>
+            <span>Giao dịch kho</span>
           </Link>
 
           <Link href="/shippers" className={getLinkClass('/shippers')}>
-            <span>🚚 Shipper</span>
+            <span>Shipper</span>
           </Link>
         </RoleGate>
 
         <Link href="/delivery-orders" className={getLinkClass('/delivery-orders')}>
-          <span>📨 Đơn giao hàng</span>
+          <span>Đơn giao hàng</span>
         </Link>
 
         <Link href="/delivery-batches" className={getLinkClass('/delivery-batches')}>
-          <span>🗂️ Đơn ghép (Batch)</span>
+          <span>Đơn ghép (Batch)</span>
         </Link>
 
         <RoleGate roles={['ADMIN', 'WAREHOUSE_MANAGER']}>
@@ -66,11 +66,11 @@ export const Sidebar = () => {
           </div>
 
           <Link href="/reports/inventory" className={getLinkClass('/reports/inventory')}>
-            <span>📈 Đối soát kho</span>
+            <span>Đối soát kho</span>
           </Link>
 
           <Link href="/reports/shippers" className={getLinkClass('/reports/shippers')}>
-            <span>⚡ Hiệu suất Shipper</span>
+            <span>Hiệu suất Shipper</span>
           </Link>
         </RoleGate>
       </nav>
@@ -82,7 +82,7 @@ export const Sidebar = () => {
           </div>
         )}
         <button onClick={logout} className="btn btn-danger w-full">
-          🚪 {collapsed ? '' : 'Đăng xuất'}
+          {collapsed ? '' : 'Đăng xuất'}
         </button>
       </div>
     </aside>

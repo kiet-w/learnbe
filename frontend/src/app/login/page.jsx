@@ -73,15 +73,38 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="flex align-center justify-center" style={{ minHeight: '100vh', backgroundColor: 'var(--bg-primary)' }}>
-      <div className="card" style={{ width: '100%', maxWidth: '400px' }}>
-        <h2 className="text-center mb-md" style={{ background: 'var(--accent-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 'bold', fontSize: 'var(--text-3xl)' }}>
-          Logistics Portal
-        </h2>
-        <p className="text-center text-secondary mb-lg" style={{ fontSize: 'var(--text-sm)' }}>
-          Hệ thống Quản lý và Điều phối Giao hàng
-        </p>
-        <Suspense fallback={<div>Đang tải...</div>}>
+    <div className="flex align-center justify-center" style={{ 
+      minHeight: '100vh', 
+      backgroundColor: 'var(--bg-primary)',
+      backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 60%)',
+      position: 'relative'
+    }}>
+      <div className="card" style={{ 
+        width: '90%', 
+        maxWidth: '420px', 
+        padding: 'var(--space-xl)',
+        background: 'rgba(13, 17, 28, 0.7)',
+        backdropFilter: 'var(--glass-blur)',
+        borderColor: 'var(--glass-border)',
+        boxShadow: 'var(--shadow-xl)',
+        borderRadius: 'var(--radius-lg)'
+      }}>
+        <div className="text-center mb-xl">
+          <h2 className="m-0 mb-xs" style={{ 
+            background: 'var(--accent-gradient)', 
+            WebkitBackgroundClip: 'text', 
+            WebkitTextFillColor: 'transparent', 
+            fontWeight: '800', 
+            fontSize: 'var(--text-3xl)',
+            letterSpacing: '-0.03em'
+          }}>
+            Logistics Hub
+          </h2>
+          <p className="text-secondary m-0" style={{ fontSize: 'var(--text-xs)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+            Hệ thống Quản lý và Điều phối
+          </p>
+        </div>
+        <Suspense fallback={<div className="text-center text-secondary" style={{ fontSize: 'var(--text-sm)' }}>Đang tải cấu hình...</div>}>
           <LoginForm />
         </Suspense>
       </div>

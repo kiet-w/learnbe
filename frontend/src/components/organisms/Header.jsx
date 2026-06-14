@@ -52,9 +52,32 @@ export const Header = () => {
     <header className="header">
       <div>{getBreadcrumbs()}</div>
       <div className="flex align-center gap-md">
-        <div className="flex-col align-end">
-          <span style={{ fontSize: 'var(--text-sm)', fontWeight: 600 }}>Tài khoản #{user?.id}</span>
-          <span className="badge badge-assigned" style={{ fontSize: '10px', padding: '2px 6px' }}>{user?.role}</span>
+        <div className="flex align-center gap-sm" style={{ 
+          background: 'rgba(255, 255, 255, 0.03)', 
+          border: '1px solid var(--border-primary)',
+          padding: '6px 14px',
+          borderRadius: 'var(--radius-full)',
+          boxShadow: 'var(--shadow-sm)'
+        }}>
+          <div style={{
+            width: '30px',
+            height: '30px',
+            borderRadius: '50%',
+            background: 'var(--accent-gradient)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: '800',
+            fontSize: '11px',
+            color: 'var(--text-primary)',
+            boxShadow: '0 2px 8px rgba(99, 102, 241, 0.3)'
+          }}>
+            {user?.role?.substring(0, 1) || 'U'}
+          </div>
+          <div className="flex-col" style={{ gap: '2px' }}>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2 }}>ID: #{user?.id}</span>
+            <span className="badge badge-assigned" style={{ fontSize: '8px', padding: '2px 6px', border: 'none', height: 'auto', lineHeight: 1 }}>{user?.role}</span>
+          </div>
         </div>
       </div>
     </header>
