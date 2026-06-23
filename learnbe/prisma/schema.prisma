@@ -1,0 +1,20 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Album {
+  id        String   @id @default(uuid())
+  title     String
+  artist    String?
+  coverUrl  String?  @map("cover_url")
+  isDefault Boolean  @default(false) @map("is_default")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("albums")
+}
