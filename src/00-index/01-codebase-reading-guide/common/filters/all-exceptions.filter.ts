@@ -2,6 +2,8 @@ import {
   ExceptionFilter,
   Catch,
   ArgumentsHost,
+  HttpStatus,
+  Inject,
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
@@ -15,15 +17,26 @@ import {
 } from './helper';
 import { ErrorResponse } from './types/error-response.type';
 
+// Interface chung cho kết quả resolve
+interface ResolvedError {
+  statusCode: number;
+  errorType: string;
+  message: string | string[];
+}
+
 @Catch()
-export class AllExceptionFilter implements ExceptionFilter {
-  private readonly logger = new Logger(AllExceptionFilter.name);
+export class AllExceptionsFilter implements ExceptionFilter {
+  private readonly logger: Logger;
+
+  constructor() {
+    this.logger = new Logger(AllExceptionsFilter.name);
+  }
 
   catch(exception: unknown, host: ArgumentsHost) {
     const contextType = host.getType();
     
     if (contextType !== 'http') {
-      this.logger.error(`Exception in ${contextType} context`, extractStackTrace(exception));
+      this.logger.error?.(`Exception in ${contextType} context`, extractStackTrace(exception));
       return; 
     }
 
@@ -31,10 +44,12 @@ export class AllExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     const response = ctx.getResponse<Response>();
 
-    // Chain of Responsibility pattern for resolving exceptions
-    const resolved = resolvePrismaException(exception) 
-                  || resolveHttpException(exception) 
-                  || resolveGenericException(exception);
+    // Chain of Responsibility pattern
+    // resolvePrisma → resolveHttp trả null nếu không match
+    // resolveGeneric luôn trả object (fallback cuối cùng, không bao giờ null)
+    const resolved: ResolvedError = resolvePrismaException(exception) 
+                                 || resolveHttpException(exception) 
+                                 || resolveGenericException(exception);
 
     const { statusCode, errorType, message } = resolved;
     const exactLocation = extractStackTrace(exception);
@@ -62,8 +77,8 @@ export class AllExceptionFilter implements ExceptionFilter {
     errorType: string,
     exactLocation: string,
   ) {
-    if (statusCode >= 500) {
-      this.logger.error(
+    if (statusCode >= HttpStatus.INTERNAL_SERVER_ERROR) {
+      this.logger.error?.(
         `[${request.method}] ${request.url} | STATUS: ${statusCode} | TYPE: ${errorType}`,
         JSON.stringify(
           {
@@ -79,7 +94,7 @@ export class AllExceptionFilter implements ExceptionFilter {
         ),
       );
     } else {
-      this.logger.warn(`[${request.method}] ${request.url} | STATUS: ${statusCode} | MSG: ${(exception as any)?.message}`);
+      this.logger.warn?.(`[${request.method}] ${request.url} | STATUS: ${statusCode} | MSG: ${(exception as any)?.message}`);
     }
   }
 }
