@@ -1,20 +1,56 @@
 generator client {
   provider = "prisma-client-js"
 }
-
 datasource db {
   provider = "postgresql"
 }
+// model Album {
+//   id        String   @id @default(uuid())
+//   title     String
+//   artist    String?
+//   coverUrl  String?  @map("cover_url")
+//   isDefault Boolean  @default(false) @map("is_default")
+//   userId    String   @map("user_id")
+//   createdAt DateTime @default(now()) @map("created_at")
+//   updatedAt DateTime @updatedAt @map("updated_at")
+// 
+//   @@map("albums")
+// } 
 
-model Album {
+
+
+
+model BookSystem {
+  id          String   @id @default(uuid())
+  title       String   @db.VarChar(255) 
+  author      String?  @db.VarChar(255)
+  isbn        String?  @unique 
+  pages       Int
+  publishYear Int?     @map("publish_year")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([id, isbn, title])
+}
+
+model User {
   id        String   @id @default(uuid())
-  title     String
-  artist    String?
-  coverUrl  String?  @map("cover_url")
-  isDefault Boolean  @default(false) @map("is_default")
-  userId    String   @map("user_id")
+  title     String   
+  content   String?
+  author    String?
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@map("albums")
+  @@index([createdAt, title]) 
+}
+
+model Blog {
+  id          String   @id @unique @default(uuid())
+  title       String   @db.VarChar(255) 
+  author      String?  @db.VarChar(255)
+  content     String?   
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([id, createdAt])
 }

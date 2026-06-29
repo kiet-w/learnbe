@@ -1,0 +1,1 @@
+{"version":3,"file":"book-response.dto.js","sourceRoot":"","sources":["../../../../../src/00-index/book-management/dto/book-response.dto.ts"],"names":[],"mappings":";;;AAAA,MAAa,eAAe;IAC1B,EAAE,CAAU;IACZ,KAAK,CAAU;IACf,MAAM,CAAiB;IACvB,IAAI,CAAiB;IACrB,KAAK,CAAU;IACf,WAAW,CAAiB;IAG5B,YAAY,OAAiC;QAC3C,MAAM,CAAC,MAAM,CAAC,IAAI,EAAE,OAAO,CAAC,CAAC;IAC/B,CAAC;CACF;AAZD,0CAYC"}
