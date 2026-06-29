@@ -52,7 +52,7 @@ let AllExceptionsFilter = AllExceptionsFilter_1 = class AllExceptionsFilter {
             requestId,
             errorType,
             clientIp: request.ip,
-            body: (0, helper_1.sanitizeBody)(request.body),
+            body: '[TẠM ẨN BỞI DEV]',
             query: request.query,
             params: request.params,
             exactLocation,

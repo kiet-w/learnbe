@@ -7,8 +7,21 @@ const SENSITIVE_FIELDS = [
 const MAX_BODY_LOG_SIZE = 4096; // 4KB tối đa cho log body
 
 /**
- * Sanitize body: che giấu thông tin nhạy cảm ở mọi cấp độ (nested object, array)
- * và giới hạn kích thước log để tránh nặng hệ thống.
+ * ---------------------------------------------------------
+ * [KIẾN THỨC NÂNG CAO] TẠM THỜI CÓ THỂ BỎ QUA CHƯA CẦN HIỂU SÂU
+ * ---------------------------------------------------------
+ * Sanitize body: Bộ lọc che giấu thông tin nhạy cảm trước khi ghi Log.
+ * 
+ * Mục đích: 
+ * - Đổi các trường như password, creditCard thành '***' để không in thẳng ra file log.
+ * 
+ * Lưu ý cốt lõi (Tại sao DTO không thay thế được cái này?):
+ * - DTO (@Exclude) chỉ che dữ liệu chạy bên trong Controller/Service.
+ * - Còn hàm này hoạt động ở tầng Filter, nó bốc trực tiếp "Raw Body" (chưa qua DTO) 
+ *   để ghi log. Do đó, nếu không có hàm này, Raw Body sẽ phơi bày 100% password ra file.
+ * 
+ * Bạn cứ để yên file này cho nó bảo vệ ứng dụng, sau này làm dự án thật (Production)
+ * hẵng quay lại nghiên cứu nhé!
  */
 export const sanitizeBody = (body: any): any => {
   if (!body) return body;

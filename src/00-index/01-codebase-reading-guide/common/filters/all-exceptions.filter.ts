@@ -49,7 +49,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
     // Lấy Request ID từ middleware (nếu có)
     const requestId = request.requestId ?? 'no-request-id';
 
-    // Chain of Responsibility pattern với fallback an toàn
+    // -------------------------------------------------------------
+    // [GHI CHÚ HỌC TẬP]: CƠ CHẾ PHÒNG CẤP CỨU & HỘI CHẨN (Chain of Responsibility)
+    // -------------------------------------------------------------
+    // Thay vì gom tất cả lỗi, nó thử từng "Bác sĩ chuyên khoa" một:
+    // 1. Bác sĩ Database (Prisma): Khám xem có lỗi trùng lặp, mất kết nối không?
+    // 2. Bác sĩ Mạng (Http): Khám xem có lỗi 404, 400 không?
+    // 3. Bác sĩ Đa khoa (Generic): Khám các lỗi linh tinh như Validation.
+    // 4. Nếu tất cả bó tay -> FALLBACK_ERROR (Lỗi 500 không xác định).
+    // Hàm nào bắt được bệnh đầu tiên sẽ dừng lại ngay và trả kết quả.
     const resolved: ResolvedError = resolvePrismaException(exception) 
                                  || resolveHttpException(exception) 
                                  || resolveGenericException(exception)
@@ -88,7 +96,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
         requestId,
         errorType,
         clientIp: request.ip,
-        body: sanitizeBody(request.body),
+        // Đã comment out đoạn code nâng cao này theo yêu cầu để học sau:
+        // body: sanitizeBody(request.body),
+        body: '[TẠM ẨN BỞI DEV]', // Thay thế tạm thời để không in pass ra log
         query: request.query,
         params: request.params,
         exactLocation,
