@@ -3,7 +3,6 @@ import {
   Catch,
   ArgumentsHost,
   HttpStatus,
-  Inject,
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
@@ -24,19 +23,22 @@ interface ResolvedError {
   message: string | string[];
 }
 
+// Fallback tuyệt đối nếu toàn bộ chain trả về null/undefined
+const FALLBACK_ERROR: ResolvedError = {
+  statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+  errorType: 'UNKNOWN_ERROR',
+  message: 'Lỗi không xác định',
+};
+
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
-  private readonly logger: Logger;
-
-  constructor() {
-    this.logger = new Logger(AllExceptionsFilter.name);
-  }
+  private readonly logger = new Logger(AllExceptionsFilter.name);
 
   catch(exception: unknown, host: ArgumentsHost) {
     const contextType = host.getType();
     
     if (contextType !== 'http') {
-      this.logger.error?.(`Exception in ${contextType} context`, extractStackTrace(exception));
+      this.logger.error(`Exception in ${contextType} context`, extractStackTrace(exception));
       return; 
     }
 
@@ -44,17 +46,19 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     const response = ctx.getResponse<Response>();
 
-    // Chain of Responsibility pattern
-    // resolvePrisma → resolveHttp trả null nếu không match
-    // resolveGeneric luôn trả object (fallback cuối cùng, không bao giờ null)
+    // Lấy Request ID từ middleware (nếu có)
+    const requestId = request.requestId ?? 'no-request-id';
+
+    // Chain of Responsibility pattern với fallback an toàn
     const resolved: ResolvedError = resolvePrismaException(exception) 
                                  || resolveHttpException(exception) 
-                                 || resolveGenericException(exception);
+                                 || resolveGenericException(exception)
+                                 || FALLBACK_ERROR;
 
     const { statusCode, errorType, message } = resolved;
-    const exactLocation = extractStackTrace(exception);
+    const exactLocation = extractStackTrace(exception, 5);
 
-    this.logError(exception, request, statusCode, errorType, exactLocation);
+    this.logError(exception, request, requestId, statusCode, errorType, exactLocation);
 
     const body: ErrorResponse = {
       statusCode,
@@ -62,6 +66,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       message,
       timestamp: new Date().toISOString(),
       path: request.url,
+      requestId,
       devLocation: process.env.NODE_ENV !== 'production' ? exactLocation : undefined,
     };
 
@@ -73,28 +78,34 @@ export class AllExceptionsFilter implements ExceptionFilter {
   private logError(
     exception: unknown,
     request: Request,
+    requestId: string,
     statusCode: number,
     errorType: string,
     exactLocation: string,
   ) {
+    const logContext = JSON.stringify(
+      {
+        requestId,
+        errorType,
+        clientIp: request.ip,
+        body: sanitizeBody(request.body),
+        query: request.query,
+        params: request.params,
+        exactLocation,
+      },
+      null,
+      2,
+    );
+
     if (statusCode >= HttpStatus.INTERNAL_SERVER_ERROR) {
-      this.logger.error?.(
-        `[${request.method}] ${request.url} | STATUS: ${statusCode} | TYPE: ${errorType}`,
-        JSON.stringify(
-          {
-            errorType,
-            clientIp: request.ip,
-            body: sanitizeBody(request.body),
-            query: request.query,
-            params: request.params,
-            exactLocation,
-          },
-          null,
-          2,
-        ),
+      this.logger.error(
+        `[${requestId}] [${request.method}] ${request.url} | STATUS: ${statusCode} | TYPE: ${errorType}`,
+        logContext,
       );
     } else {
-      this.logger.warn?.(`[${request.method}] ${request.url} | STATUS: ${statusCode} | MSG: ${(exception as any)?.message}`);
+      this.logger.warn(
+        `[${requestId}] [${request.method}] ${request.url} | STATUS: ${statusCode} | TYPE: ${errorType}`,
+      );
     }
   }
 }

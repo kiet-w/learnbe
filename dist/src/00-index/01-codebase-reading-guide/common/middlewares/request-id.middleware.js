@@ -13,7 +13,7 @@ let RequestIdMiddleware = class RequestIdMiddleware {
     use(req, res, next) {
         const requestId = req.headers['x-request-id'] || (0, crypto_1.randomUUID)();
         req.requestId = requestId;
-        res.setHeader('x-request-id', requestId);
+        res.setHeader('X-Request-Id', requestId);
         next();
     }
 };

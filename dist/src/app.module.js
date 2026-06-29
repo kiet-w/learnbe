@@ -14,7 +14,11 @@ const prisma_module_1 = require("./prisma/prisma.module");
 const book_module_1 = require("./00-index/book-management/book.module");
 const user_module_1 = require("./00-index/01-codebase-reading-guide/user/user.module");
 const blog_module_1 = require("./00-index/01-codebase-reading-guide/blog/blog.module");
+const request_id_middleware_1 = require("./00-index/01-codebase-reading-guide/common/middlewares/request-id.middleware");
 let AppModule = class AppModule {
+    configure(consumer) {
+        consumer.apply(request_id_middleware_1.RequestIdMiddleware).forRoutes('*');
+    }
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
